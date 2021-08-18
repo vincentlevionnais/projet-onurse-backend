@@ -2,8 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Patient;
-use App\Repository\PatientRepository;
+use App\Entity\Nurse;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,43 +13,30 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class PatientController extends AbstractController
+class NurseController extends AbstractController
 {
     
-    /**
-     * Get patients 
-     * 
-     * @Route("/api/patients", name="api_patients_get", methods="GET")
-     */
-    public function Browse(PatientRepository $patientRepository): Response
-    {
-        $patients = $patientRepository->findAll();
-
-        // On demande à Symfony de "sérialiser" nos entités sous forme de JSON
-        return $this->json($patients, 200, [], ['groups' => 'patients_get']);
-    }
-
      /**
-     * Get one patient by id
+     * Get one nurse by id (see my account)
      * 
-     * @Route("/api/patients/{id<\d+>}", name="api_patients_get_item", methods="GET")
+     * @Route("/api/account/{id<\d+>}", name="api_nurse_get_item", methods="GET")
      */
-    public function read(Patient $patient): Response
+    public function read(Nurse $nurse): Response
     {       
-        return $this->json($patient, Response::HTTP_OK, [], ['groups' => 'patients_get']);
+        return $this->json($nurse, Response::HTTP_OK, [], ['groups' => 'nurse_get']);
     }
 
 
     /**
-     * Edit patient by id
+     * Edit nurse by id (edit my account)
      * 
-     * @Route("/api/patients/{id<\d+>}", name="api_patients_put_item", methods={"PUT", "PATCH"})
+     * @Route("/api/account/settings/{id<\d+>}", name="api_nurse_put_item", methods={"PUT", "PATCH"})
      */
-    public function Edit(Patient $patient = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
+    public function Edit(Nurse $nurse = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
         // Si patient non trouvé
-        if ($patient === null) {
-            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
+        if ($nurse === null) {
+            return new JsonResponse(["message" => "Compte non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
         // Si oui on récupère les données de la requête
@@ -61,10 +47,10 @@ class PatientController extends AbstractController
         // sinon => 422 HTTP_UNPROCESSABLE_ENTITY
 
         // On désérialise le JSON vers l'entité Patient existante
-        $patient = $serializer->deserialize($data, Patient::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $patient]);
+        $patient = $serializer->deserialize($data, Nurse::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $nurse]);
 
         // On valide l'entité avec le service Validator
-        $errors = $validator->validate($patient);
+        $errors = $validator->validate($nurse);
 
         // Gestion de l'affichage des erreurs
         if (count($errors) > 0) {
@@ -103,14 +89,14 @@ class PatientController extends AbstractController
 
         //!todo Conditionner le message de retour au cas où
         // l'entité ne serait pas modifiée
-        return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
+        return new JsonResponse(["message" => "Compte modifié"], Response::HTTP_OK);
     }
 
 
     /**
-     * add a new patient
+     * add a new Nurse (create account)
      * 
-     * @Route("/api/patients", name="api_patients_post", methods="POST")
+     * @Route("/api/create/account", name="api_nurse_post", methods="POST")
      */
     public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
@@ -118,10 +104,10 @@ class PatientController extends AbstractController
 
         // On désérialise le JSON vers une nouvelle entité Patient
         // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
-        $patient = $serializer->deserialize($jsonContent, Patient::class, 'json');
+        $nurse = $serializer->deserialize($jsonContent, Nurse::class, 'json');
 
         // On valide l'entité avec le service Validator
-        $errors = $validator->validate($patient);
+        $errors = $validator->validate($nurse);
 
         // Gestion de l'affichage des erreurs
         // ($errors se comporte comme un tableau et contient un élément par erreur)
@@ -132,46 +118,46 @@ class PatientController extends AbstractController
         //dd($movie);
 
         // On prépare à faire persister en BDD, on flush
-        $entityManager->persist($patient);
+        $entityManager->persist($nurse);
         $entityManager->flush();
 
         // REST nous demande un statut 201 et un header Location: url
         //! Si on le fait "à la mano" voir autre manière de faire ?
         return $this->json(
             // Le film que l'on retourne en JSON directement au front
-            $patient,
+            $nurse,
             // Le status code
             // C'est cool d'utiliser les constantes de classe !
             // => ça aide à la lecture du code et au fait de penser objet
             Response::HTTP_CREATED,
             // Un header Location + l'URL de la ressource créée
-            ['Location' => $this->generateUrl('api_patients_get_item', ['id' => $patient->getId()])],
-            //!TODO à vérifier après avoir mis les relations sur les entités
+            ['Location' => $this->generateUrl('api_nurse_get_item', ['id' => $nurse->getId()])],
+            //!todo à vérifier après avoir mis les relations sur les entités
             // Le groupe de sérialisation pour que $patient soit sérialisé sans erreur de référence circulaire
-            ['groups' => 'patients_get']
+            ['groups' => 'nurse_get']
         );
     }
 
      /**
-     * Delete a patient
+     * Delete a nurse ( delete my account)
      * 
-     * @Route("/api/patients/{id<\d+>}", name="api_patients_delete", methods="DELETE")
+     * @Route("/api/nurse/{id<\d+>}", name="api_nurse_delete", methods="DELETE")
      */
-    public function delete(Patient $patient = null, EntityManagerInterface $entityManager)
+    public function delete(Nurse $nurse = null, EntityManagerInterface $entityManager)
     {
 
         //Gestion des erreurs
-        if (null === $patient) {
+        if (null === $nurse) {
 
-            $error = 'Ce patient n\'existe pas';
+            $error = 'Ce compte n\'existe pas';
 
             return $this->json(['error' => $error], Response::HTTP_NOT_FOUND);
         }
 
-        $entityManager->remove($patient);
+        $entityManager->remove($nurse);
         $entityManager->flush();
 
-        return $this->json(['message' => 'Le patient a bien été supprimé.'], Response::HTTP_OK);
+        return $this->json(['message' => 'Votre compte a bien été supprimé.'], Response::HTTP_OK);
     }
 
 }

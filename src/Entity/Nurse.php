@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\NurseRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=NurseRepository::class)
@@ -14,31 +15,37 @@ class Nurse
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"nurse_get"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=64)
+     * @Groups({"nurse_get"})
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=64)
+     * @Groups({"nurse_get"})
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"nurse_get"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=64)
+     * @Groups({"nurse_get"})
      */
     private $password;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"nurse_get"})
      */
     private $phone;
 
