@@ -17,9 +17,12 @@
  `bin/console doctrine:database:create`
 
  - Transmission des migrations à la Database
-`bin/console doctrine:migration:migrate` 
+`bin/console make:migration`
+`bin/console doctrine:migrations:migrate` 
 
-- Chargement des fixtures si besoin
+
+# Chargement de fixtures si besoin
+ `composer require orm-fixtures `
  `bin/console doctrine:fixtures:load -n`
 
 
