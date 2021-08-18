@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PatientRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=PatientRepository::class)
@@ -14,71 +15,85 @@ class Patient
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"patients_get"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=64)
+     * @Groups({"patients_get"})
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=64)
+     * @Groups({"patients_get"})
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="date", nullable=true)
+     * @Groups({"patients_get"})
      */
     private $birthdate;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"patients_get"})
      */
     private $nir;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"patients_get"})
      */
     private $phone;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"patients_get"})
      */
     private $completeAdress;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"patients_get"})
      */
     private $informationAdress;
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Groups({"patients_get"})
      */
     private $note;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"patients_get"})
      */
     private $doctorName;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"patients_get"})
      */
     private $mutualName;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"patients_get"})
      */
     private $mutualNumberAmc;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"patients_get"})
      */
     private $pathology;
 
     /**
      * @ORM\Column(type="text", nullable=true)
+     * @Groups({"patients_get"})
      */
     private $trustedPerson;
 
