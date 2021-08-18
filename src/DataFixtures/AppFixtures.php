@@ -26,7 +26,8 @@ class AppFixtures extends Fixture
          //password de test hashé: "liberal"
          $nurse->setCreatedAt(new \DateTimeImmutable('2021-08-10 10:15:00'));
          //$nurse->setUpdatedAt('');
- 
+
+         $manager->persist($nurse);
          
          // 10 patients "en dur" pour avoir des données choisies cohérentes (nir/birthdate...)
  
@@ -49,7 +50,6 @@ class AppFixtures extends Fixture
          $patient->setTrustedPerson('MARI Gérard Mensouaf 0680089090');
          $patient->setCreatedAt(new \DateTimeImmutable('2021-08-15 12:00:00'));
          //$patient->setUpdatedAt('');
-
 
         $manager->persist($patient);
 
