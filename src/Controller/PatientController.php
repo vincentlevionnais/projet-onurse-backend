@@ -48,25 +48,25 @@ class PatientController extends AbstractController
      */
     public function Edit(Patient $patient = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
-        // Si patient non trouvé
+        // If patient not found
         if ($patient === null) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
-        // Si oui on récupère les données de la requête
+        // else we get the data's request
         $data = $request->getContent();
 
         // @todo Pour PUT, s'assurer qu'on ait un certain nombre de champs
         // @todo Pour PATCH, s'assurer qu'on au moins un champ
         // sinon => 422 HTTP_UNPROCESSABLE_ENTITY
 
-        // On désérialise le JSON vers l'entité Patient existante
+        // we désérialise the JSON to the existing Patient entity
         $patient = $serializer->deserialize($data, Patient::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $patient]);
 
-        // On valide l'entité avec le service Validator
+        // We can validate the entity with the Validator service
         $errors = $validator->validate($patient);
 
-        // Gestion de l'affichage des erreurs
+        // Errors display
         if (count($errors) > 0) {
 
             // Objectif : créer ce format de sortie
@@ -85,20 +85,20 @@ class PatientController extends AbstractController
             //     }
             // }
 
-            // On crée untableau d'erreurs
+            // creating an errors array
             $newErrors = [];
 
             foreach ($errors as $error) {
-                // Astuce ici ! on poush dans un tabbleau
-                // = similaire à la structure des Flash Messages
-                // On push le message, à la clé qui contient la propriété                
+                // We push in an arrays
+                // = similar tu the structure of Flash Messages
+                // We pus the message, ti the key that contains the property         
                 $newErrors[$error->getPropertyPath()][] = $error->getMessage();
             }
 
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Enregistrement en BDD
+        // Database recording
          $entityManager->flush();
 
         //!todo Conditionner le message de retour au cas où
@@ -116,35 +116,33 @@ class PatientController extends AbstractController
     {
         $jsonContent = $request->getContent();
 
-        // On désérialise le JSON vers une nouvelle entité Patient
+        // Désérialise the JSON to the new entity Patient
         // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
         $patient = $serializer->deserialize($jsonContent, Patient::class, 'json');
 
-        // On valide l'entité avec le service Validator
+        //We can validate the entity with the Validator service
         $errors = $validator->validate($patient);
 
-        // Gestion de l'affichage des erreurs
-        // ($errors se comporte comme un tableau et contient un élément par erreur)
+        // Errors display
+        // ($errors is like an array, he contains one élément by error)
         if (count($errors) > 0) {
             return $this->json(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         //dd($movie);
 
-        // On prépare à faire persister en BDD, on flush
+        // We are preparing to persist in Database, and flush
         $entityManager->persist($patient);
         $entityManager->flush();
 
-        // REST nous demande un statut 201 et un header Location: url
+        // REST ask us a 201 status and a header Location: url
         //! Si on le fait "à la mano" voir autre manière de faire ?
         return $this->json(
-            // Le film que l'on retourne en JSON directement au front
+            // the Patient we return in JSON at the front
             $patient,
-            // Le status code
-            // C'est cool d'utiliser les constantes de classe !
-            // => ça aide à la lecture du code et au fait de penser objet
+            // The status code
             Response::HTTP_CREATED,
-            // Un header Location + l'URL de la ressource créée
+            // The header Location + l'URL of the created ressource
             ['Location' => $this->generateUrl('api_patients_get_item', ['id' => $patient->getId()])],
             //!TODO à vérifier après avoir mis les relations sur les entités
             // Le groupe de sérialisation pour que $patient soit sérialisé sans erreur de référence circulaire
@@ -160,7 +158,7 @@ class PatientController extends AbstractController
     public function delete(Patient $patient = null, EntityManagerInterface $entityManager)
     {
 
-        //Gestion des erreurs
+        //Errors display
         if (null === $patient) {
 
             $error = 'Ce patient n\'existe pas';
