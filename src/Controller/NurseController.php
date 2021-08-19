@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Nurse;
+use App\Repository\NurseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +16,20 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class NurseController extends AbstractController
 {
+
+    /**
+     * Get Nurses 
+     * 
+     * @Route("/api/nurses", name="api_nurses_get", methods="GET")
+     */
+    public function Browse(NurseRepository $nursesRepository): Response
+    {
+        $nurses = $nursesRepository->findAll();
+
+        // On demande à Symfony de "sérialiser" nos entités sous forme de JSON
+        return $this->json($nurses, 200, [], ['groups' => 'nurse_get']);
+    }
+
     
      /**
      * Get one nurse by id (see my account)
