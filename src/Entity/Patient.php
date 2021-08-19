@@ -165,24 +165,24 @@ class Patient
         return $this;
     }
 
-    public function getNir(): ?int
+    public function getNir(): ?string
     {
         return $this->nir;
     }
 
-    public function setNir(?int $nir): self
+    public function setNir(?string $nir): self
     {
         $this->nir = $nir;
 
         return $this;
     }
 
-    public function getPhone(): ?int
+    public function getPhone(): ?string
     {
         return $this->phone;
     }
 
-    public function setPhone(int $phone): self
+    public function setPhone(string $phone): self
     {
         $this->phone = $phone;
 
