@@ -123,7 +123,7 @@ class AppFixtures extends Fixture
         //$patient->setNote("");
         $patient->setTrustedPerson("SOEUR Claire Delune 0660500500  25 Rue de l'Horizon 35800 Saint-Lunaire");
         $patient->setCreatedAt(new DateTimeImmutable("2021-08-15 12:00:00"));
-        $patient->setUpdatedAt(new DateTimeImmutable("2021-08-15 14:30:00"));
+        $patient->setUpdatedAt(new DateTime("2021-08-15 14:30:00"));
 
         $manager->persist($patient);
 
@@ -192,7 +192,7 @@ class AppFixtures extends Fixture
         $patient->setNote("suivi cicatrisation/pansement");
         $patient->setTrustedPerson("MERE Katell Mensouaf 0680089090");
         $patient->setCreatedAt(new DateTimeImmutable("2021-08-15 12:00:00"));
-        $patient->setUpdatedAt(new DateTimeImmutable("2021-08-15 15:00:00"));
+        $patient->setUpdatedAt(new DateTime("2021-08-15 15:00:00"));
 
         $manager->persist($patient);
 
