@@ -40,7 +40,7 @@ class AppFixtures extends Fixture
         $nurse->setPassword('$2y$13$1WR9MM2276uGyIzD7RWviuDKi.s/PUju9K37GU0VC2Yh1fazVf6re');
         //password de test hashé: "soins"
         $nurse->setCreatedAt(new DateTimeImmutable('2021-08-15 12:13:37'));
-        //$nurse->setUpdatedAt('');
+        //$nurse->setUpdatedAt("");
 
         $manager->persist($nurse);
 
@@ -52,6 +52,8 @@ class AppFixtures extends Fixture
         $appointment->setDatetimeStart(new DateTimeImmutable("2021-08-19 12:00:00"));
         $appointment->setDatetimeEnd(new DateTimeImmutable("2021-08-19 14:30:00"));
         $appointment->setReason("Un premier rendez-vous de test");
+        $appointment->setCreatedAt(new DateTimeImmutable("now"));
+        //$appointment->setUpdatedAt("");
         
         $manager->persist($appointment);
 
@@ -61,6 +63,8 @@ class AppFixtures extends Fixture
         $appointment->setDatetimeStart(new DateTimeImmutable("2021-08-20 9:30:00"));
         $appointment->setDatetimeEnd(new DateTimeImmutable("2021-08-20 10:00:00"));
         $appointment->setReason("Un deuxième rendez-vous de test...");
+        $appointment->setCreatedAt(new DateTimeImmutable("now"));
+        //$appointment->setUpdatedAt("");
         
         $manager->persist($appointment);
 
@@ -70,6 +74,8 @@ class AppFixtures extends Fixture
         $appointment->setDatetimeStart(new DateTimeImmutable("2021-08-20 10:30:00"));
         $appointment->setDatetimeEnd(new DateTimeImmutable("2021-08-20 11:30:00"));
         $appointment->setReason("Mon 3e rendez-vous, c'est super!!");
+        $appointment->setCreatedAt(new DateTimeImmutable("now"));
+        //$appointment->setUpdatedAt("");
         
         $manager->persist($appointment);
 
