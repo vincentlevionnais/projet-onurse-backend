@@ -32,6 +32,26 @@ class Appointment
      */
     private $reason;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Patient::class, inversedBy="appointments")
+     */
+    private $patient;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Nurse::class, inversedBy="appointments")
+     */
+    private $nurse;
+
+    /**
+     * @ORM\Column(type="datetime_immutable", options={"default": "CURRENT_TIMESTAMP"})
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    private $updatedAt;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -69,6 +89,54 @@ class Appointment
     public function setReason(?string $reason): self
     {
         $this->reason = $reason;
+
+        return $this;
+    }
+
+    public function getPatient(): ?Patient
+    {
+        return $this->patient;
+    }
+
+    public function setPatient(?Patient $patient): self
+    {
+        $this->patient = $patient;
+
+        return $this;
+    }
+
+    public function getNurse(): ?Nurse
+    {
+        return $this->nurse;
+    }
+
+    public function setNurse(?Nurse $nurse): self
+    {
+        $this->nurse = $nurse;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
