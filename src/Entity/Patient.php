@@ -2,14 +2,18 @@
 
 namespace App\Entity;
 
-use App\Repository\PatientRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PatientRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=PatientRepository::class)
+ * Cette entité va réagir aux évènements "lifecycle callbacks" de Doctrine
+ * @ORM\HasLifecycleCallbacks()
  */
 class Patient
 {
@@ -105,7 +109,7 @@ class Patient
     private $createdAt;
 
     /**
-     * @ORM\Column(type="datetime_immutable", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $updatedAt;
 
@@ -122,6 +126,7 @@ class Patient
     public function __construct()
     {
         $this->appointments = new ArrayCollection();
+        $this->createdAt = new DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -297,12 +302,12 @@ class Patient
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
+    public function setUpdatedAt(?\DateTime $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
 
@@ -349,5 +354,15 @@ class Patient
         }
 
         return $this;
+    }
+
+    /**
+     * Exécute cette méthode avant l'update de l'entité en BDD
+     * Géré en interne par Doctrine
+     * @ORM\PreUpdate
+     */
+    public function setUpdatedAtValue()
+    {
+        $this->updatedAt = new DateTime();
     }
 }

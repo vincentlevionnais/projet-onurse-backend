@@ -2,11 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\AppointmentRepository;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\AppointmentRepository;
 
 /**
  * @ORM\Entity(repositoryClass=AppointmentRepository::class)
+ * Cette entité va réagir aux évènements "lifecycle callbacks" de Doctrine
+ * @ORM\HasLifecycleCallbacks()
  */
 class Appointment
 {
@@ -48,9 +52,15 @@ class Appointment
     private $createdAt;
 
     /**
-     * @ORM\Column(type="datetime_immutable", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $updatedAt;
+
+    public function __construct()
+    {
+
+        $this->createdAt = new DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -129,15 +139,25 @@ class Appointment
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): self
+    public function setUpdatedAt(?\DateTime $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    /**
+     * Exécute cette méthode avant l'update de l'entité en BDD
+     * Géré en interne par Doctrine
+     * @ORM\PreUpdate
+     */
+    public function setUpdatedAtValue()
+    {
+        $this->updatedAt = new DateTime();
     }
 }
