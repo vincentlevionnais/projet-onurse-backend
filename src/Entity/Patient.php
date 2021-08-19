@@ -44,7 +44,7 @@ class Patient
     private $nir;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", length=255)
      * @Groups({"patients_get"})
      */
     private $phone;
