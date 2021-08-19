@@ -1,5 +1,5 @@
 #Handling CORS
-Header Set Access-Control-Allow-Origin http://localhost:8080
+Header Set Access-Control-Allow-Origin *
 
 # Use the front controller as index file. It serves as a fallback solution when
 # every other rewrite/redirect fails (e.g. in an aliased environment without
