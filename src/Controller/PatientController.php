@@ -69,6 +69,7 @@ class PatientController extends AbstractController
         // Errors display
         if (count($errors) > 0) {
 
+            //!todo mettre en anglais
             // Objectif : créer ce format de sortie
             // {
             //     "errors": {

@@ -55,7 +55,8 @@ class NurseController extends AbstractController
         // Errors display
         if (count($errors) > 0) {
 
-            // Objectif : créer ce format de sortie
+            //!todo mettre en anglais
+            // Objectif : create this out format 
             // {
             //     "errors": {
             //         "title": [
