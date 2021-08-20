@@ -15,7 +15,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
-header("Access-Control-Allow-Origin: http://localhost:8080");
+
 
 class NurseController extends AbstractController
 {
