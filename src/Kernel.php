@@ -3,6 +3,7 @@
 namespace App;
 
 
+use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -11,6 +12,18 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
+    
+
+    public function registerBundles()
+    {
+        $bundles = [
+            // ...
+            new \Nelmio\CorsBundle\NelmioCorsBundle(),
+            // ...
+        ];
+        // ...
+    }
+
 
     protected function configureContainer(ContainerConfigurator $container): void
     {
