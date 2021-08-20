@@ -14,8 +14,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-header("Access-Control-Allow-Origin: http://localhost:8080");
-
 class AppointmentController extends AbstractController
 {
     /**
