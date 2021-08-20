@@ -14,16 +14,6 @@ class Kernel extends BaseKernel
     use MicroKernelTrait;
     
 
-    public function registerBundles()
-    {
-        $bundles = [
-            // ...
-            new \Nelmio\CorsBundle\NelmioCorsBundle(),
-            // ...
-        ];
-        // ...
-    }
-
 
     protected function configureContainer(ContainerConfigurator $container): void
     {
