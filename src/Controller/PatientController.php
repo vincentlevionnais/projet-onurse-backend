@@ -22,13 +22,15 @@ class PatientController extends AbstractController
      * 
      * @Route("/api/patients", name="api_patients_get", methods="GET")
      */
-    public function Browse(PatientRepository $patientRepository): Response
+    public function browse(PatientRepository $patientRepository): Response
     {
-        $patients = $patientRepository->findAll();
+        $patients = $patientRepository->findBy(['nurse'=>$this->getUser()]);
 
-        // On demande à Symfony de "sérialiser" nos entités sous forme de JSON
+        // Resquest to Symfony to "serialize" entities in form of JSON
         return $this->json($patients, 200, [], ['groups' => 'patients_get']);
     }
+
+
 
      /**
      * Get one patient by id
@@ -130,7 +132,7 @@ class PatientController extends AbstractController
             return $this->json(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        //dd($movie);
+        $patient->setNurse($this->getUser());
 
         // We are preparing to persist in Database, and flush
         $entityManager->persist($patient);
