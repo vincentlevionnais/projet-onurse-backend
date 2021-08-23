@@ -5,6 +5,7 @@ namespace App\Entity;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\AppointmentRepository;
 
 // conflit
@@ -20,26 +21,31 @@ class Appointment
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"appointment_get"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"appointment_get"})
      */
     private $datetimeStart;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"appointment_get"})
      */
     private $datetimeEnd;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"appointment_get"})
      */
     private $reason;
 
     /**
      * @ORM\ManyToOne(targetEntity=Patient::class, inversedBy="appointments")
+     * @Groups({"appointment_get"})
      */
     private $patient;
 

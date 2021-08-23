@@ -26,20 +26,34 @@ class AppointmentController extends AbstractController
      */
     public function browse(AppointmentRepository $appointmentRepository): Response
     {
-        $appointments = $appointmentRepository->findAll();
+        $appointments = $appointmentRepository->findby(['nurse'=>$this->getUser()]);
 
         // Resquest to Symfony to "serialize" entities in form of JSON
-        return $this->json($appointments, 200, [], []);
+        return $this->json($appointments, 200, [], ['groups' => 'appointment_get']);
     }
 
     /**
-     * Get an appointment by id
+     * Get an appointment of one nurse by id
      * 
      * @Route("/api/appointments/{id<\d+>}", name="api_appointments_get_item", methods="GET")
      */
     public function read(Appointment $appointment): Response
-    {       
-        return $this->json($appointment, Response::HTTP_OK, [], []);
+    {   
+        $user = $this->getUser();
+        $userId = $user->getId();
+        // dd($userId);
+
+        $nurseAppointment= $appointment->getNurse();
+        $nurseAppointmentId = $nurseAppointment->getId();
+        //  dd($nurseAppointmentId);
+        
+
+        if($userId != $nurseAppointmentId)
+        {
+          throw $this->createNotFoundException('vous n\'êtes pas concerné par ce rendez-vous');
+        }
+         return $this->json($appointment, Response::HTTP_OK, [], ['groups' => 'appointment_get']);
+        
     }
 
     /**
