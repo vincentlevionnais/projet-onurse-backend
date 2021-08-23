@@ -39,6 +39,18 @@ class PatientController extends AbstractController
      */
     public function read(Patient $patient): Response
     {       
+        $user = $this->getUser();
+        $userId = $user->getId();
+
+        $nursePatient = $patient->getNurse();
+        $nursePatientId = $nursePatient->getId();
+
+        // If this patient is not the patient of this nurse/user
+        if($userId != $nursePatientId)
+        {
+            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
+        }
+
         return $this->json($patient, Response::HTTP_OK, [], ['groups' => 'patients_get']);
     }
 
@@ -50,6 +62,18 @@ class PatientController extends AbstractController
      */
     public function Edit(Patient $patient = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
+        $user = $this->getUser();
+        $userId = $user->getId();
+
+        $nursePatient = $patient->getNurse();
+        $nursePatientId = $nursePatient->getId();
+
+        // If this patient is not the patient of this nurse/user
+        if($userId != $nursePatientId)
+        {
+            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
+        }
+
         // If patient not found
         if ($patient === null) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
@@ -160,11 +184,22 @@ class PatientController extends AbstractController
      */
     public function delete(Patient $patient = null, EntityManagerInterface $entityManager)
     {
+        $user = $this->getUser();
+        $userId = $user->getId();
+
+        $nursePatient = $patient->getNurse();
+        $nursePatientId = $nursePatient->getId();
+
+        // If this patient is not the patient of this nurse/user
+        if($userId != $nursePatientId)
+        {
+            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
+        }
 
         //Errors display
         if (null === $patient) {
 
-            $error = 'Ce patient n\'existe pas';
+            $error = 'Patient non trouvé';
 
             return $this->json(['error' => $error], Response::HTTP_NOT_FOUND);
         }
