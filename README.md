@@ -17,7 +17,6 @@
  `bin/console doctrine:database:create`
 
  - Transmission des migrations à la Database
-`bin/console make:migration`
 `bin/console doctrine:migrations:migrate` 
 
 
@@ -25,4 +24,9 @@
  `composer require orm-fixtures `
  `bin/console doctrine:fixtures:load -n`
 
+
+# Sécurisation session utilisateur avec JWT
+ `composer require lexik/jwt-authentication-bundle`
+ -générer les clés JWT sur l'environnement :
+ `php bin/console lexik:jwt:generate-keypair`
 
