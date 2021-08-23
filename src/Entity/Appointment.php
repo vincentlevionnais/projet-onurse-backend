@@ -7,6 +7,8 @@ use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AppointmentRepository;
 
+// conflit
+
 /**
  * @ORM\Entity(repositoryClass=AppointmentRepository::class)
  * Cette entité va réagir aux évènements "lifecycle callbacks" de Doctrine
