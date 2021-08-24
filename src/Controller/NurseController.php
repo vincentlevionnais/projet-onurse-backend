@@ -113,7 +113,7 @@ class NurseController extends AbstractController
     /**
      * add a new Nurse (create account)
      * 
-     * @Route("/api/nurses", name="api_nurse_post", methods="POST")
+     * @Route("/api/login", name="api_nurse_post", methods="POST")
      */
     public function add(Request $request,UserPasswordHasherInterface $userPasswordHasher, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
