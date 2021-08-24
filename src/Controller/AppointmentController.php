@@ -26,20 +26,34 @@ class AppointmentController extends AbstractController
      */
     public function browse(AppointmentRepository $appointmentRepository): Response
     {
-        $appointments = $appointmentRepository->findAll();
+        $appointments = $appointmentRepository->findby(['nurse'=>$this->getUser()]);
 
         // Resquest to Symfony to "serialize" entities in form of JSON
-        return $this->json($appointments, 200, [], []);
+        return $this->json($appointments, 200, [], ['groups' => 'appointment_get']);
     }
 
     /**
-     * Get an appointment by id
+     * Get an appointment of one nurse by id
      * 
      * @Route("/api/appointments/{id<\d+>}", name="api_appointments_get_item", methods="GET")
      */
     public function read(Appointment $appointment): Response
-    {       
-        return $this->json($appointment, Response::HTTP_OK, [], []);
+    {   
+        $user = $this->getUser();
+        $userId = $user->getId();
+        // dd($userId);
+
+        $nurseAppointment= $appointment->getNurse();
+        $nurseAppointmentId = $nurseAppointment->getId();
+        //  dd($nurseAppointmentId);
+        
+       
+        if($userId != $nurseAppointmentId)
+        {
+          return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
+        }
+         return $this->json($appointment, Response::HTTP_OK, [], ['groups' => 'appointment_get']);
+        
     }
 
     /**
@@ -92,6 +106,20 @@ class AppointmentController extends AbstractController
      */
     public function edit(Appointment $appointment = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
+
+        $user = $this->getUser();
+        $userId = $user->getId();
+        // dd($userId);
+
+        $nurseAppointment= $appointment->getNurse();
+        $nurseAppointmentId = $nurseAppointment->getId();
+        //  dd($nurseAppointmentId);
+        
+       
+        if($userId != $nurseAppointmentId)
+        {
+          return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
+        }
         // Appointment not found
         if ($appointment === null) {
             return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
@@ -99,6 +127,8 @@ class AppointmentController extends AbstractController
 
         // Retrieve the request data
         $data = $request->getContent();
+
+        
 
         //TODO Pour PUT, s'assurer qu'on ait un certain nombre de champs
         //TODO Pour PATCH, s'assurer qu'on au moins un champ
@@ -157,6 +187,20 @@ class AppointmentController extends AbstractController
      */
     public function delete(Appointment $appointment = null, EntityManagerInterface $em)
     {
+
+        $user = $this->getUser();
+        $userId = $user->getId();
+        // dd($userId);
+
+        $nurseAppointment= $appointment->getNurse();
+        $nurseAppointmentId = $nurseAppointment->getId();
+        //  dd($nurseAppointmentId);
+        
+       
+        if($userId != $nurseAppointmentId)
+        {
+          return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
+        }
         if (null === $appointment) {
 
             $error = 'Ce film n\'existe pas';
