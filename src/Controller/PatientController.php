@@ -25,13 +25,15 @@ class PatientController extends AbstractController
      * 
      * @Route("/api/patients", name="api_patients_get", methods="GET")
      */
-    public function Browse(PatientRepository $patientRepository): Response
+    public function browse(PatientRepository $patientRepository): Response
     {
-        $patients = $patientRepository->findAll();
+        $patients = $patientRepository->findBy(['nurse'=>$this->getUser()]);
 
-        // On demande à Symfony de "sérialiser" nos entités sous forme de JSON
+        // Resquest to Symfony to "serialize" entities in form of JSON
         return $this->json($patients, 200, [], ['groups' => 'patients_get']);
     }
+
+
 
      /**
      * Get one patient by id
@@ -40,6 +42,18 @@ class PatientController extends AbstractController
      */
     public function read(Patient $patient): Response
     {       
+        $user = $this->getUser();
+        $userId = $user->getId();
+
+        $nursePatient = $patient->getNurse();
+        $nursePatientId = $nursePatient->getId();
+
+        // If this patient is not the patient of this nurse/user
+        if($userId != $nursePatientId)
+        {
+            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
+        }
+
         return $this->json($patient, Response::HTTP_OK, [], ['groups' => 'patients_get']);
     }
 
@@ -49,8 +63,20 @@ class PatientController extends AbstractController
      * 
      * @Route("/api/patients/{id<\d+>}", name="api_patients_put_item", methods={"PUT", "PATCH"})
      */
-    public function Edit(Patient $patient = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
+    public function edit(Patient $patient = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
+        $user = $this->getUser();
+        $userId = $user->getId();
+
+        $nursePatient = $patient->getNurse();
+        $nursePatientId = $nursePatient->getId();
+
+        // If this patient is not the patient of this nurse/user
+        if($userId != $nursePatientId)
+        {
+            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
+        }
+
         // If patient not found
         if ($patient === null) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
@@ -116,7 +142,7 @@ class PatientController extends AbstractController
      * 
      * @Route("/api/patients", name="api_patients_post", methods="POST")
      */
-    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
+    public function add(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $jsonContent = $request->getContent();
 
@@ -133,7 +159,7 @@ class PatientController extends AbstractController
             return $this->json(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        //dd($movie);
+        $patient->setNurse($this->getUser());
 
         // We are preparing to persist in Database, and flush
         $entityManager->persist($patient);
@@ -161,11 +187,22 @@ class PatientController extends AbstractController
      */
     public function delete(Patient $patient = null, EntityManagerInterface $entityManager)
     {
+        $user = $this->getUser();
+        $userId = $user->getId();
+
+        $nursePatient = $patient->getNurse();
+        $nursePatientId = $nursePatient->getId();
+
+        // If this patient is not the patient of this nurse/user
+        if($userId != $nursePatientId)
+        {
+            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
+        }
 
         //Errors display
         if (null === $patient) {
 
-            $error = 'Ce patient n\'existe pas';
+            $error = 'Patient non trouvé';
 
             return $this->json(['error' => $error], Response::HTTP_NOT_FOUND);
         }

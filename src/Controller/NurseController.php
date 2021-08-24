@@ -29,7 +29,7 @@ class NurseController extends AbstractController
     {
         $nurses = $nursesRepository->findAll();
 
-        // On demande à Symfony de "sérialiser" nos entités sous forme de JSON
+        // Resquest to Symfony to "serialize" entities in form of JSON
         return $this->json($nurses, 200, [], ['groups' => 'nurse_get']);
     }
 
@@ -134,7 +134,7 @@ class NurseController extends AbstractController
             return $this->json(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        //dd($movie);
+        //dd($nurse);
 
         // We are preparing to persist in Database, and flush
         $entityManager->persist($nurse);
