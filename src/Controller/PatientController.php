@@ -60,7 +60,7 @@ class PatientController extends AbstractController
      * 
      * @Route("/api/patients/{id<\d+>}", name="api_patients_put_item", methods={"PUT", "PATCH"})
      */
-    public function Edit(Patient $patient = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
+    public function edit(Patient $patient = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
         $user = $this->getUser();
         $userId = $user->getId();
@@ -139,7 +139,7 @@ class PatientController extends AbstractController
      * 
      * @Route("/api/patients", name="api_patients_post", methods="POST")
      */
-    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
+    public function add(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $jsonContent = $request->getContent();
 
