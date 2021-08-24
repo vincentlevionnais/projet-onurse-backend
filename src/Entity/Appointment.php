@@ -64,6 +64,12 @@ class Appointment
      */
     private $updatedAt;
 
+    /**
+     * @ORM\Column(type="smallint", nullable=true)
+     * @Groups({"appointment_get"})
+     */
+    private $status;
+
     public function __construct()
     {
 
@@ -167,5 +173,17 @@ class Appointment
     public function setUpdatedAtValue()
     {
         $this->updatedAt = new DateTime();
+    }
+
+    public function getStatus(): ?int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?int $status): self
+    {
+        $this->status = $status;
+
+        return $this;
     }
 }
