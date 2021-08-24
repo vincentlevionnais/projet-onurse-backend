@@ -13,9 +13,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-
-
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class NurseController extends AbstractController
 {
@@ -25,7 +23,7 @@ class NurseController extends AbstractController
      * 
      * @Route("/api/nurses", name="api_nurses_get", methods="GET")
      */
-    public function Browse(NurseRepository $nursesRepository): Response
+    public function browse(NurseRepository $nursesRepository): Response
     {
         $nurses = $nursesRepository->findAll();
 
@@ -50,7 +48,7 @@ class NurseController extends AbstractController
      * 
      * @Route("/api/nurses/{id<\d+>}", name="api_nurse_put_item", methods={"PUT", "PATCH"})
      */
-    public function Edit(Nurse $nurse = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
+    public function edit(Nurse $nurse = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
         // if nurse not found
         if ($nurse === null) {
@@ -65,7 +63,7 @@ class NurseController extends AbstractController
         // sinon => 422 HTTP_UNPROCESSABLE_ENTITY
 
         // we désérialise the JSON to the existing Nurse entity
-        $patient = $serializer->deserialize($data, Nurse::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $nurse]);
+        $nurse = $serializer->deserialize($data, Nurse::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $nurse]);
 
         // We can validate the entity with the Validator service
         $errors = $validator->validate($nurse);
@@ -117,7 +115,7 @@ class NurseController extends AbstractController
      * 
      * @Route("/api/nurses", name="api_nurse_post", methods="POST")
      */
-    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
+    public function add(Request $request,UserPasswordHasherInterface $userPasswordHasher, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $jsonContent = $request->getContent();
 
@@ -134,6 +132,11 @@ class NurseController extends AbstractController
             return $this->json(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+
+        // On hash le mot de passe
+        $hashedPassword = $userPasswordHasher->hashPassword($nurse, $nurse->getPassword());
+        // On le remet dans $user->password
+        $nurse->setPassword($hashedPassword);
         //dd($nurse);
 
         // We are preparing to persist in Database, and flush
