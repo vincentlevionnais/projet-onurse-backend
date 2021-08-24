@@ -41,8 +41,8 @@ lexik_jwt_authentication:
                 - jwt_s
 
 
-    set_cookies:
-        BEARER: ~
+    # set_cookies:
+    #     BEARER: ~
 
     # Full config with defaults:
     #  BEARER:
