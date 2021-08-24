@@ -94,7 +94,7 @@ class AppointmentController extends AbstractController
             // A header Location + URL of the created resource
             ['Location' => $this->generateUrl('api_appointments_get_item', ['id' => $appointment->getId()])],
             // The serialization group so that $appointment is serialized without circular reference errors
-            []
+            ['groups'=> 'appointment_get']
         );
 
     }

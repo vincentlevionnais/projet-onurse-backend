@@ -45,6 +45,7 @@ class Appointment
 
     /**
      * @ORM\ManyToOne(targetEntity=Patient::class, inversedBy="appointments")
+     * @Groups({"nurse_get"})
      * @Groups({"appointment_get"})
      */
     private $patient;

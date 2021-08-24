@@ -53,7 +53,6 @@ class Nurse  implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=64)
-     * @Groups({"nurse_get"})
      */
     private $password;
 
