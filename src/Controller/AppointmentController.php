@@ -78,6 +78,7 @@ class AppointmentController extends AbstractController
             return $this->json(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $appointment->setNurse($this->getUser());
         //dd($appointment);
 
         // persist, and flush
@@ -201,9 +202,10 @@ class AppointmentController extends AbstractController
         {
           return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
         }
+
         if (null === $appointment) {
 
-            $error = 'Ce film n\'existe pas';
+            $error = 'Rendez-vous non trouvé';
 
             return $this->json(['error' => $error], Response::HTTP_NOT_FOUND);
         }
