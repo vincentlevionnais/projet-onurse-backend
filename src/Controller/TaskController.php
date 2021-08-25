@@ -6,6 +6,7 @@ use App\Entity\Task;
 use Doctrine\ORM\EntityManager;
 use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use phpDocumentor\Reflection\PseudoTypes\True_;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,7 +25,7 @@ class TaskController extends AbstractController
      */
     public function browse(TaskRepository $taskRepository): Response
     {
-        $tasks = $taskRepository->findBy(['nurse'=>$this->getUser()]);
+        $tasks = $taskRepository->findBy(['nurse' => $this->getUser()]);
 
         // Resquest to Symfony to "serialize" entities in form of JSON
         return $this->json($tasks, 200, [], ['groups' => 'tasks_get']);
@@ -35,20 +36,25 @@ class TaskController extends AbstractController
      * 
      * @Route("/api/tasks/{id<\d+>}", name="api_tasks_get_item", methods="GET")
      */
-    public function read(Task $task): Response
-    {       
-        $user = $this->getUser();
-        $userId = $user->getId();
+    public function read(Task $task = null): Response
+    {
 
-        $nurseTask = $task->getNurse();
-        $nurseTaskId = $nurseTask->getId();
-
-        if($userId != $nurseTaskId)
-        {
-            return new JsonResponse(["message" => "Tâche non trouvée"], Response::HTTP_NOT_FOUND);
+        if ($task === null) {
+            return new JsonResponse(["message" => "Tâche non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
-        return $this->json($task, Response::HTTP_OK, [], ['groups' => 'tasks_get']);
+            $user = $this->getUser();
+            $userId = $user->getId();
+
+            $nurseTask = $task->getNurse();
+            $nurseTaskId = $nurseTask->getId();
+
+            if ($userId != $nurseTaskId) {
+                return new JsonResponse(["message" => "Tâche non trouvée"], Response::HTTP_NOT_FOUND);
+            }
+
+            return $this->json($task, Response::HTTP_OK, [], ['groups' => 'tasks_get']);
+
     }
 
     /**
@@ -64,8 +70,7 @@ class TaskController extends AbstractController
         $nurseTask = $task->getNurse();
         $nurseTaskId = $nurseTask->getId();
 
-        if($userId != $nurseTaskId)
-        {
+        if ($userId != $nurseTaskId) {
             return new JsonResponse(["message" => "Tâche non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -82,7 +87,7 @@ class TaskController extends AbstractController
 
             $newErrors = [];
 
-            foreach ($errors as $error) {       
+            foreach ($errors as $error) {
                 $newErrors[$error->getPropertyPath()][] = $error->getMessage();
             }
 
@@ -108,7 +113,7 @@ class TaskController extends AbstractController
         $errors = $validator->validate($task);
 
         if (count($errors) > 0) {
-            return $this->json(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->json(["errors" => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $task->setNurse($this->getUser());
@@ -137,8 +142,7 @@ class TaskController extends AbstractController
         $nurseTask = $task->getNurse();
         $nurseTaskId = $nurseTask->getId();
 
-        if($userId != $nurseTaskId)
-        {
+        if ($userId != $nurseTaskId) {
             return new JsonResponse(["message" => "Tâche non trouvée"], Response::HTTP_NOT_FOUND);
         }
 
@@ -154,5 +158,4 @@ class TaskController extends AbstractController
 
         return $this->json(['message' => 'Tâche supprimée.'], Response::HTTP_OK);
     }
-
 }
