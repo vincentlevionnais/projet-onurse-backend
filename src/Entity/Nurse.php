@@ -84,11 +84,17 @@ class Nurse  implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $appointments;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Task::class, mappedBy="nurse", orphanRemoval=true)
+     */
+    private $tasks;
+
     public function __construct()
     {
         $this->patients = new ArrayCollection();
         $this->appointments = new ArrayCollection();
         $this->createdAt = new DateTimeImmutable();
+        $this->tasks = new ArrayCollection();
         
     }
 
@@ -307,6 +313,36 @@ class Nurse  implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection|Task[]
+     */
+    public function getTasks(): Collection
+    {
+        return $this->tasks;
+    }
+
+    public function addTask(Task $task): self
+    {
+        if (!$this->tasks->contains($task)) {
+            $this->tasks[] = $task;
+            $task->setNurse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTask(Task $task): self
+    {
+        if ($this->tasks->removeElement($task)) {
+            // set the owning side to null (unless already changed)
+            if ($task->getNurse() === $this) {
+                $task->setNurse(null);
+            }
+        }
+
+        return $this;
     }
 
 
