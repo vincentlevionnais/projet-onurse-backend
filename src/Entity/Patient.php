@@ -22,6 +22,7 @@ class Patient
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups({"patients_get"})
+     * @Groups ({"appointment_get"})
      */
     private $id;
 
@@ -39,7 +40,6 @@ class Patient
 
     /**
      * @ORM\Column(type="date", nullable=true)
-     * @Groups({"patients_get"})
      */
     private $birthdate;
 
