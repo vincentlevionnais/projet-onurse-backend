@@ -1,4 +1,7 @@
 {
+    "gesdinet/jwt-refresh-token-bundle": {
+        "version": "v0.12.0"
+    },
     "lcobucci/clock": {
         "version": "2.0.0"
     },

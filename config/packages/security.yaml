@@ -24,7 +24,13 @@ security:
 
 
     firewalls:
-        
+
+        # put it before all your other firewall API entries
+        api_token_refresh:
+            pattern: ^/api/token/refresh
+            stateless: true
+            
+
         login:
             pattern: ^/api/login
             stateless: true
@@ -32,6 +38,7 @@ security:
                 check_path: /api/login_check
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
 
         # Règles où le JWT doit s'appliquer
         api:
@@ -60,5 +67,8 @@ security:
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         # then when the user is authenticated, acces to the api
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        # ...
+        - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
+        # ...
 
     
