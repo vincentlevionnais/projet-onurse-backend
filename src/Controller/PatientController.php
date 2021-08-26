@@ -16,10 +16,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
 
-
 class PatientController extends AbstractController
 {
-    
     /**
      * Get patients 
      * 
@@ -27,30 +25,33 @@ class PatientController extends AbstractController
      */
     public function browse(PatientRepository $patientRepository): Response
     {
-        $patients = $patientRepository->findBy(['nurse'=>$this->getUser()]);
+        $patients = $patientRepository->findBy(['nurse' => $this->getUser()]);
 
         // Resquest to Symfony to "serialize" entities in form of JSON
         return $this->json($patients, 200, [], ['groups' => 'patients_get']);
     }
 
 
-
-     /**
+    /**
      * Get one patient by id
      * 
      * @Route("/api/patients/{id<\d+>}", name="api_patients_get_item", methods="GET")
      */
-    public function read(Patient $patient): Response
-    {       
+    public function read(Patient $patient = null): Response
+    {
+        if ($patient === null) {
+            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
+        }
+
+        // we compare the user and the nurse of the patient
         $user = $this->getUser();
         $userId = $user->getId();
 
         $nursePatient = $patient->getNurse();
         $nursePatientId = $nursePatient->getId();
 
-        // If this patient is not the patient of this nurse/user
-        if($userId != $nursePatientId)
-        {
+        // Error if this patient is not the patient of this nurse/user
+        if ($userId != $nursePatientId) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -75,9 +76,7 @@ class PatientController extends AbstractController
         $nursePatient = $patient->getNurse();
         $nursePatientId = $nursePatient->getId();
 
-        // If this patient is not the patient of this nurse/user
-        if($userId != $nursePatientId)
-        {
+        if ($userId != $nursePatientId) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -88,31 +87,15 @@ class PatientController extends AbstractController
         // @todo Pour PATCH, s'assurer qu'on au moins un champ
         // sinon => 422 HTTP_UNPROCESSABLE_ENTITY
 
-        // we désérialise the JSON to the existing Patient entity
+        // we deserialize the JSON to the existing Patient entity
         $patient = $serializer->deserialize($data, Patient::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $patient]);
 
         // We can validate the entity with the Validator service
         $errors = $validator->validate($patient);
 
         // Errors display
+        // ($errors is like an array, it contains one élément by error)
         if (count($errors) > 0) {
-
-            //!todo mettre en anglais
-            // Objectif : créer ce format de sortie
-            // {
-            //     "errors": {
-            //         "title": [
-            //             "Cette valeur ne doit pas être vide."
-            //         ],
-            //             "releaseDate": [
-            //             "Cette valeur doit être de type string."
-            //         ],
-            //         "rating": [
-            //             "Cette chaîne est trop longue. Elle doit avoir au maximum 1 caractère.",
-            //             "Cette valeur doit être l'un des choix proposés."
-            //         ]
-            //     }
-            // }
 
             // creating an errors array
             $newErrors = [];
@@ -127,12 +110,12 @@ class PatientController extends AbstractController
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Database recording
-         $entityManager->flush();
-
-        //!todo Conditionner le message de retour au cas où
-        // l'entité ne serait pas modifiée
-        return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
+        // Database recording error or succes
+        if (($entityManager->flush()) === false) {
+            return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
+        } else {
+            return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
+        }
     }
 
 
@@ -145,52 +128,39 @@ class PatientController extends AbstractController
     {
         $jsonContent = $request->getContent();
 
-
-
-        // Deserialise the JSON to the new entity Patient
+        // Deserialize the JSON to the new entity Patient
         // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
         $patient = $serializer->deserialize($jsonContent, Patient::class, 'json');
 
         $patient->setNurse($this->getUser());
 
-            //We can validate the entity with the Validator service
-            $errors = $validator->validate($patient);
+        //We can validate the entity with the Validator service
+        $errors = $validator->validate($patient);
 
-            // Errors display
-            // ($errors is like an array, he contains one élément by error)
-            if (count($errors) > 0) {
-    
-                $newErrors = [];
-    
-                foreach ($errors as $error) {
-                    // We push in an arrays
-                    // = similar tu the structure of Flash Messages
-                    // We push the message, to the key that contains the property         
-                    $newErrors[$error->getPropertyPath()][] = $error->getMessage();
-                }
-    
-                return new JsonResponse(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
+        if (count($errors) > 0) {
+
+            $newErrors = [];
+
+            foreach ($errors as $error) {
+
+                $newErrors[$error->getPropertyPath()][] = $error->getMessage();
             }
 
-        // We are preparing to persist in Database, and flush
+            return new JsonResponse(["errors" => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         $entityManager->persist($patient);
         $entityManager->flush();
 
-        // REST ask us a 201 status and a header Location: url
         return $this->json(
-            // the Patient we return in JSON at the front
             $patient,
-            // The status code
             Response::HTTP_CREATED,
-            // The header Location + l'URL of the created ressource
             ['Location' => $this->generateUrl('api_patients_get_item', ['id' => $patient->getId()])],
-            //!TODO à vérifier après avoir mis les relations sur les entités
-            // Le groupe de sérialisation pour que $patient soit sérialisé sans erreur de référence circulaire
             ['groups' => 'patients_get']
         );
     }
 
-     /**
+    /**
      * Delete a patient
      * 
      * @Route("/api/patients/{id<\d+>}", name="api_patients_delete", methods="DELETE")
@@ -200,7 +170,7 @@ class PatientController extends AbstractController
         if (null === $patient) {
             $error = 'Patient non trouvé';
             return $this->json(['error' => $error], Response::HTTP_NOT_FOUND);
-        }   
+        }
 
         $user = $this->getUser();
         $userId = $user->getId();
@@ -208,9 +178,8 @@ class PatientController extends AbstractController
         $nursePatient = $patient->getNurse();
         $nursePatientId = $nursePatient->getId();
 
-        // If this patient_id is not the patient of this nurse/user
-        if($userId != $nursePatientId)
-        {
+        // If the $nursePatientId not refer to a patient of this nurse/user
+        if ($userId != $nursePatientId) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -219,5 +188,4 @@ class PatientController extends AbstractController
 
         return $this->json(['message' => 'Le patient a bien été supprimé.'], Response::HTTP_OK);
     }
-
 }
