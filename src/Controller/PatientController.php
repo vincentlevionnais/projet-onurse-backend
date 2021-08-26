@@ -65,6 +65,10 @@ class PatientController extends AbstractController
      */
     public function edit(Patient $patient = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
+        if ($patient === null) {
+            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
+        }
+
         $user = $this->getUser();
         $userId = $user->getId();
 
@@ -74,11 +78,6 @@ class PatientController extends AbstractController
         // If this patient is not the patient of this nurse/user
         if($userId != $nursePatientId)
         {
-            return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
-        }
-
-        // If patient not found
-        if ($patient === null) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -146,27 +145,38 @@ class PatientController extends AbstractController
     {
         $jsonContent = $request->getContent();
 
-        // Désérialise the JSON to the new entity Patient
+
+
+        // Deserialise the JSON to the new entity Patient
         // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
         $patient = $serializer->deserialize($jsonContent, Patient::class, 'json');
 
-        //We can validate the entity with the Validator service
-        $errors = $validator->validate($patient);
-
-        // Errors display
-        // ($errors is like an array, he contains one élément by error)
-        if (count($errors) > 0) {
-            return $this->json(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
         $patient->setNurse($this->getUser());
+
+            //We can validate the entity with the Validator service
+            $errors = $validator->validate($patient);
+
+            // Errors display
+            // ($errors is like an array, he contains one élément by error)
+            if (count($errors) > 0) {
+    
+                $newErrors = [];
+    
+                foreach ($errors as $error) {
+                    // We push in an arrays
+                    // = similar tu the structure of Flash Messages
+                    // We push the message, to the key that contains the property         
+                    $newErrors[$error->getPropertyPath()][] = $error->getMessage();
+                }
+    
+                return new JsonResponse(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
 
         // We are preparing to persist in Database, and flush
         $entityManager->persist($patient);
         $entityManager->flush();
 
         // REST ask us a 201 status and a header Location: url
-        //! Si on le fait "à la mano" voir autre manière de faire ?
         return $this->json(
             // the Patient we return in JSON at the front
             $patient,
@@ -187,24 +197,21 @@ class PatientController extends AbstractController
      */
     public function delete(Patient $patient = null, EntityManagerInterface $entityManager)
     {
+        if (null === $patient) {
+            $error = 'Patient non trouvé';
+            return $this->json(['error' => $error], Response::HTTP_NOT_FOUND);
+        }   
+
         $user = $this->getUser();
         $userId = $user->getId();
 
         $nursePatient = $patient->getNurse();
         $nursePatientId = $nursePatient->getId();
 
-        // If this patient is not the patient of this nurse/user
+        // If this patient_id is not the patient of this nurse/user
         if($userId != $nursePatientId)
         {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
-        }
-
-        //Errors display
-        if (null === $patient) {
-
-            $error = 'Patient non trouvé';
-
-            return $this->json(['error' => $error], Response::HTTP_NOT_FOUND);
         }
 
         $entityManager->remove($patient);
