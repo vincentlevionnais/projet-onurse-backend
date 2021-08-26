@@ -40,7 +40,7 @@ class Patient
 
     /**
      * @ORM\Column(type="date", nullable=true)
-     * @Groups({"patients_get"}
+     * @Groups({"patients_get"})
      */
     private $birthdate;
 
