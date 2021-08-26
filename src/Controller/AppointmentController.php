@@ -37,16 +37,18 @@ class AppointmentController extends AbstractController
      * 
      * @Route("/api/appointments/{id<\d+>}", name="api_appointments_get_item", methods="GET")
      */
-    public function read(Appointment $appointment): Response
+    public function read(Appointment $appointment = null): Response
     {   
+        if($appointment === null)
+        {
+          return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
+        }
+
         $user = $this->getUser();
         $userId = $user->getId();
-        // dd($userId);
 
         $nurseAppointment= $appointment->getNurse();
         $nurseAppointmentId = $nurseAppointment->getId();
-        //  dd($nurseAppointmentId);
-        
        
         if($userId != $nurseAppointmentId)
         {
@@ -107,30 +109,25 @@ class AppointmentController extends AbstractController
      */
     public function edit(Appointment $appointment = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
-
+        if ($appointment === null) {
+            return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
+        }
+        
         $user = $this->getUser();
         $userId = $user->getId();
-        // dd($userId);
 
         $nurseAppointment= $appointment->getNurse();
         $nurseAppointmentId = $nurseAppointment->getId();
-        //  dd($nurseAppointmentId);
-        
        
         if($userId != $nurseAppointmentId)
         {
           return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
         }
-        // Appointment not found
-        if ($appointment === null) {
-            return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
-        }
 
         // Retrieve the request data
         $data = $request->getContent();
 
-        
-
+    
         //TODO Pour PUT, s'assurer qu'on ait un certain nombre de champs
         //TODO Pour PATCH, s'assurer qu'on au moins un champ
         //TODO sinon => 422 HTTP_UNPROCESSABLE_ENTITY
@@ -188,26 +185,20 @@ class AppointmentController extends AbstractController
      */
     public function delete(Appointment $appointment = null, EntityManagerInterface $em)
     {
+        if (null === $appointment) {
+            $error = 'Rendez-vous non trouvé';
+            return $this->json(['error' => $error], Response::HTTP_NOT_FOUND);
+        }
 
         $user = $this->getUser();
         $userId = $user->getId();
-        // dd($userId);
 
         $nurseAppointment= $appointment->getNurse();
         $nurseAppointmentId = $nurseAppointment->getId();
-        //  dd($nurseAppointmentId);
         
-       
         if($userId != $nurseAppointmentId)
         {
           return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
-        }
-
-        if (null === $appointment) {
-
-            $error = 'Rendez-vous non trouvé';
-
-            return $this->json(['error' => $error], Response::HTTP_NOT_FOUND);
         }
 
         $em->remove($appointment);
