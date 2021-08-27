@@ -14,28 +14,26 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+
+
 class NurseController extends AbstractController
 {
-    
-     /**
+
+    /**
      * Get one nurse by id (see my account)
      * 
      * @Route("/api/nurses/{id<\d+>}", name="api_nurse_get_item", methods="GET")
      */
     public function read(Nurse $nurse = null): Response
-    {     
-        if($nurse === null)
-        {
+    {
+        if ($nurse === null) {
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
+        // Only the user can access to his own informations
         $user = $this->getUser();
-        $userId = $user->getId();
 
-        $nurseId = $nurse->getId();
-
-        if($userId != $nurseId)
-        {
+        if ($user != $nurse) {
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -55,14 +53,10 @@ class NurseController extends AbstractController
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
-        // if user is not this nurse
+        // if the user is not this nurse, return error
         $user = $this->getUser();
-        $userId = $user->getId();
 
-        $nurseId = $nurse->getId();
-
-        if($userId != $nurseId)
-        {
+        if ($user != $nurse) {
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -95,12 +89,13 @@ class NurseController extends AbstractController
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Database recording
-        //$entityManager->flush();
-
-        //!todo Conditionner le message de retour au cas où
-        // l'entité ne serait pas modifiée
-        return new JsonResponse(["message" => "Compte modifié"], Response::HTTP_OK);
+        // Database recording error or succes
+        //! TODO : manage errors with @Assert
+        if (($entityManager->flush()) === false) {
+            return new JsonResponse(["message" => "Erreur : Compte non modifié"], Response::HTTP_EXPECTATION_FAILED);
+        } else {
+            return new JsonResponse(["message" => "Compte modifié"], Response::HTTP_OK);
+        }
     }
 
 
@@ -109,23 +104,17 @@ class NurseController extends AbstractController
      * 
      * @Route("/api/login", name="api_nurse_post", methods="POST")
      */
-    public function add(Request $request,UserPasswordHasherInterface $userPasswordHasher, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
+    public function add(Request $request, UserPasswordHasherInterface $userPasswordHasher, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $jsonContent = $request->getContent();
 
-        // Deserialise the JSON to the new entity Nurse
-        // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
         $nurse = $serializer->deserialize($jsonContent, Nurse::class, 'json');
 
-        // We can validate the entity with the Validator service
         $errors = $validator->validate($nurse);
 
-        // Errors display
-        // ($errors is like an array, he contains one élément by error)
         if (count($errors) > 0) {
-            return $this->json(["errors" => $errors],Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->json(["errors" => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-
 
         $hashedPassword = $userPasswordHasher->hashPassword($nurse, $nurse->getPassword());
 
@@ -143,32 +132,27 @@ class NurseController extends AbstractController
         );
     }
 
-     /**
+    /**
      * Delete a nurse ( delete my account)
      * 
      * @Route("/api/nurses/{id<\d+>}", name="api_nurse_delete", methods="DELETE")
      */
     public function delete(Nurse $nurse = null, EntityManagerInterface $entityManager)
     {
-        if($nurse === null)
-        {
+        if ($nurse === null) {
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
         $user = $this->getUser();
-        $userId = $user->getId();
 
-        $nurseId = $nurse->getId();
-
-        if($userId != $nurseId)
-        {
+        if ($user != $nurse) {
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
         $entityManager->remove($nurse);
         $entityManager->flush();
 
+        //! TODO : manage errors with @Assert
         return $this->json(['message' => 'Votre compte a bien été supprimé.'], Response::HTTP_OK);
     }
-
 }
