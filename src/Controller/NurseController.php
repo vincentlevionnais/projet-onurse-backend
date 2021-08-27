@@ -32,11 +32,8 @@ class NurseController extends AbstractController
 
         // Only the user can access to his own informations
         $user = $this->getUser();
-        $userId = $user->getId();
 
-        $nurseId = $nurse->getId();
-
-        if ($userId != $nurseId) {
+        if ($user != $nurse) {
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -58,11 +55,8 @@ class NurseController extends AbstractController
 
         // if the user is not this nurse, return error
         $user = $this->getUser();
-        $userId = $user->getId();
 
-        $nurseId = $nurse->getId();
-
-        if ($userId != $nurseId) {
+        if ($user != $nurse) {
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -96,6 +90,7 @@ class NurseController extends AbstractController
         }
 
         // Database recording error or succes
+        //! TODO : manage errors with @Assert
         if (($entityManager->flush()) === false) {
             return new JsonResponse(["message" => "Erreur : Compte non modifié"], Response::HTTP_EXPECTATION_FAILED);
         } else {
@@ -149,17 +144,15 @@ class NurseController extends AbstractController
         }
 
         $user = $this->getUser();
-        $userId = $user->getId();
 
-        $nurseId = $nurse->getId();
-
-        if ($userId != $nurseId) {
+        if ($user != $nurse) {
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
         $entityManager->remove($nurse);
         $entityManager->flush();
 
+        //! TODO : manage errors with @Assert
         return $this->json(['message' => 'Votre compte a bien été supprimé.'], Response::HTTP_OK);
     }
 }

@@ -43,12 +43,10 @@ class AppointmentController extends AbstractController
         }
 
         $user = $this->getUser();
-        $userId = $user->getId();
 
         $nurseAppointment = $appointment->getNurse();
-        $nurseAppointmentId = $nurseAppointment->getId();
 
-        if ($userId != $nurseAppointmentId) {
+        if ($user != $nurseAppointment) {
             return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
         }
         return $this->json($appointment, Response::HTTP_OK, [], ['groups' => 'appointment_get']);
@@ -101,12 +99,9 @@ class AppointmentController extends AbstractController
         }
 
         $user = $this->getUser();
-        $userId = $user->getId();
-
         $nurseAppointment = $appointment->getNurse();
-        $nurseAppointmentId = $nurseAppointment->getId();
 
-        if ($userId != $nurseAppointmentId) {
+        if ($user != $nurseAppointment) {
             return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -139,6 +134,7 @@ class AppointmentController extends AbstractController
         }
 
         // Database recording error or succes
+        //! TODO : manage errors with @Assert
         if (($entityManager->flush()) === false) {
             return new JsonResponse(["message" => "Erreur : Rendez-vous non modifié"], Response::HTTP_EXPECTATION_FAILED);
         } else {
@@ -159,18 +155,16 @@ class AppointmentController extends AbstractController
         }
 
         $user = $this->getUser();
-        $userId = $user->getId();
-
         $nurseAppointment = $appointment->getNurse();
-        $nurseAppointmentId = $nurseAppointment->getId();
 
-        if ($userId != $nurseAppointmentId) {
+        if ($user != $nurseAppointment) {
             return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
         $em->remove($appointment);
         $em->flush();
 
+        //! TODO : manage errors with @Assert
         return $this->json(['message' => 'Rendez-vous supprimé.'], Response::HTTP_OK);
     }
 }

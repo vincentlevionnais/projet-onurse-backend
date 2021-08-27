@@ -45,13 +45,10 @@ class PatientController extends AbstractController
 
         // we compare the user and the nurse of the patient
         $user = $this->getUser();
-        $userId = $user->getId();
-
         $nursePatient = $patient->getNurse();
-        $nursePatientId = $nursePatient->getId();
 
         // Error if this patient is not the patient of this nurse/user
-        if ($userId != $nursePatientId) {
+        if ($user != $nursePatient) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -71,12 +68,9 @@ class PatientController extends AbstractController
         }
 
         $user = $this->getUser();
-        $userId = $user->getId();
-
         $nursePatient = $patient->getNurse();
-        $nursePatientId = $nursePatient->getId();
 
-        if ($userId != $nursePatientId) {
+        if ($user != $nursePatient) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -110,7 +104,8 @@ class PatientController extends AbstractController
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Database recording error or succes
+        // Database recording error or succes 
+        //! TODO : manage errors with @Assert
         if (($entityManager->flush()) === false) {
             return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
         } else {
@@ -173,19 +168,17 @@ class PatientController extends AbstractController
         }
 
         $user = $this->getUser();
-        $userId = $user->getId();
-
         $nursePatient = $patient->getNurse();
-        $nursePatientId = $nursePatient->getId();
 
         // If the $nursePatientId not refer to a patient of this nurse/user
-        if ($userId != $nursePatientId) {
+        if ($user != $nursePatient) {
             return new JsonResponse(["message" => "Patient non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
         $entityManager->remove($patient);
         $entityManager->flush();
-
+        
+        //! TODO : manage errors with @Assert
         return $this->json(['message' => 'Le patient a bien été supprimé.'], Response::HTTP_OK);
     }
 }
