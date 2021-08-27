@@ -141,7 +141,7 @@ class PatientController extends AbstractController
                 $newErrors[$error->getPropertyPath()][] = $error->getMessage();
             }
 
-            return new JsonResponse(["errors" => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $entityManager->persist($patient);
