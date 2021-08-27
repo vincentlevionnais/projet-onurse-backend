@@ -23,7 +23,7 @@ class AppFixtures extends Fixture
         $nurse->setLastname('Firmier');
         $nurse->setPhone('0770502030');
         $nurse->setEmail('alainfirmier@liberal.com');
-        $nurse->setPassword('$2y$13$j.gXly4IYfmvqYnL/rEDWuIta7DuUmfQcj9RiYiLIeGWvRIv045Y2');
+        $nurse->setPassword('$2y$13$yq5uR2jvSBECkfhaR/EiwOesDLObx0yT7/wazF6Qtu4uRrWSE4i7e');
         //password de test hashé: "liberal"
         $nurse->setCreatedAt(new DateTimeImmutable('2021-08-10 10:15:00'));
         //$nurse->setUpdatedAt('');
@@ -37,7 +37,7 @@ class AppFixtures extends Fixture
         $nurse->setLastname('Hize');
         $nurse->setPhone('0655443210');
         $nurse->setEmail('morganehize@soins.fr');
-        $nurse->setPassword('$2y$13$1WR9MM2276uGyIzD7RWviuDKi.s/PUju9K37GU0VC2Yh1fazVf6re');
+        $nurse->setPassword('$2y$13$naQUP4dej3Fmygyp8k6K/uTu1xSaEhQ/GHlpS2m3HeXbpkiumsiwe');
         //password de test hashé: "soins"
         $nurse->setCreatedAt(new DateTimeImmutable('2021-08-15 12:13:37'));
         //$nurse->setUpdatedAt("");

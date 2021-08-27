@@ -5,7 +5,10 @@ namespace App\Entity;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\AppointmentRepository;
+
+// conflit
 
 /**
  * @ORM\Entity(repositoryClass=AppointmentRepository::class)
@@ -18,26 +21,32 @@ class Appointment
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"appointment_get"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"appointment_get"})
      */
     private $datetimeStart;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"appointment_get"})
      */
     private $datetimeEnd;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"appointment_get"})
      */
     private $reason;
 
     /**
      * @ORM\ManyToOne(targetEntity=Patient::class, inversedBy="appointments")
+     * @Groups({"nurse_get"})
+     * @Groups({"appointment_get"})
      */
     private $patient;
 
@@ -55,6 +64,12 @@ class Appointment
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $updatedAt;
+
+    /**
+     * @ORM\Column(type="smallint", nullable=true)
+     * @Groups({"appointment_get"})
+     */
+    private $status;
 
     public function __construct()
     {
@@ -159,5 +174,17 @@ class Appointment
     public function setUpdatedAtValue()
     {
         $this->updatedAt = new DateTime();
+    }
+
+    public function getStatus(): ?int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?int $status): self
+    {
+        $this->status = $status;
+
+        return $this;
     }
 }
