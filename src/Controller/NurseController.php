@@ -20,6 +20,21 @@ class NurseController extends AbstractController
 {
 
     /**
+     * Get the nurse connected
+     * 
+     * @Route("/api/index", name="api_nurse_connected_get", methods="GET")
+     */
+    public function index(): Response
+    {
+
+        // Only the user can access to his own informations
+        $user = $this->getUser();
+    
+        return $this->json($user, Response::HTTP_OK, [], ['groups' => 'home_get']);
+    }
+
+
+    /**
      * Get one nurse by id (see my account)
      * 
      * @Route("/api/nurses/{id<\d+>}", name="api_nurse_get_item", methods="GET")

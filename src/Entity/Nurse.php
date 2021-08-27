@@ -25,6 +25,7 @@ class Nurse  implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups({"nurse_get"})
+     * @Groups({"home_get"})
      */
     private $id;
 
@@ -36,6 +37,7 @@ class Nurse  implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @ORM\Column(type="string", length=64)
      * @Groups({"nurse_get"})
+     * @Groups({"home_get"})
      */
     private $firstname;
 
