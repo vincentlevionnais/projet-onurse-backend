@@ -43,7 +43,7 @@ class Patient
      * @Groups({"patients_get"})
      * 
      * @Assert\NotBlank
-     * @Assert\Length(min = 2, max = 64)
+     * @Assert\Length(min = 1, max = 64)
      * @Assert\Type("string")
      */
     private $lastname;

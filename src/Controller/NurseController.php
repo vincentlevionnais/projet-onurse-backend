@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Nurse;
+use App\Form\NurseType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,8 +14,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
-
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class NurseController extends AbstractController
 {
@@ -46,17 +46,12 @@ class NurseController extends AbstractController
      * 
      * @Route("/api/nurses/{id<\d+>}", name="api_nurse_put_item", methods={"PUT", "PATCH"})
      */
-    public function edit(Nurse $nurse = null, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
+    public function edit(Nurse $nurse = null, UserPasswordHasherInterface $userPasswordHasher, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $entityManager, Request $request): Response
     {
-        // if nurse not found
-        if ($nurse === null) {
-            return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
-        }
-
-        // if the user is not this nurse, return error
         $user = $this->getUser();
 
-        if ($user != $nurse) {
+        // if nurse not found or if the user is not this nurse, return error
+        if ($nurse === null || $user != $nurse) {
             return new JsonResponse(["message" => "Compte utilisateur non trouvé"], Response::HTTP_NOT_FOUND);
         }
 
@@ -69,6 +64,9 @@ class NurseController extends AbstractController
 
         // we désérialise the JSON to the existing Nurse entity
         $nurse = $serializer->deserialize($data, Nurse::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $nurse]);
+
+        $hashedPassword = $userPasswordHasher->hashPassword($nurse, $nurse->getPassword());
+        $nurse->setPassword($hashedPassword);
 
         // We can validate the entity with the Validator service
         $errors = $validator->validate($nurse);
@@ -89,13 +87,8 @@ class NurseController extends AbstractController
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Database recording error or succes
-        //! TODO : manage errors with @Assert
-        if (($entityManager->flush()) === false) {
-            return new JsonResponse(["message" => "Erreur : Compte non modifié"], Response::HTTP_EXPECTATION_FAILED);
-        } else {
-            return new JsonResponse(["message" => "Compte modifié"], Response::HTTP_OK);
-        }
+        return new JsonResponse(["message" => "Compte modifié"], Response::HTTP_OK);
+        
     }
 
 
@@ -107,22 +100,26 @@ class NurseController extends AbstractController
     public function add(Request $request, UserPasswordHasherInterface $userPasswordHasher, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $jsonContent = $request->getContent();
-
         $nurse = $serializer->deserialize($jsonContent, Nurse::class, 'json');
+
+        $hashedPassword = $userPasswordHasher->hashPassword($nurse, $nurse->getPassword());
+        $nurse->setPassword($hashedPassword);
 
         $errors = $validator->validate($nurse);
 
         if (count($errors) > 0) {
-            return $this->json(["errors" => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+
+            $newErrors = [];
+
+            foreach ($errors as $error) {
+                $newErrors[$error->getPropertyPath()][] = $error->getMessage();
+            }
+
+            return $this->json(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-
-        $hashedPassword = $userPasswordHasher->hashPassword($nurse, $nurse->getPassword());
-
-        $nurse->setPassword($hashedPassword);
 
         $entityManager->persist($nurse);
         $entityManager->flush();
-
 
         return $this->json(
             $nurse,
