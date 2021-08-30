@@ -101,6 +101,8 @@ class NurseController extends AbstractController
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $entityManager->flush();
+
         return new JsonResponse(["message" => "Compte modifié"], Response::HTTP_OK);
     }
 
