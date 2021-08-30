@@ -29,7 +29,8 @@ class NurseController extends AbstractController
 
         // Only the user can access to his own informations
         $user = $this->getUser();
-    
+        dd($user);
+     
         return $this->json($user, Response::HTTP_OK, [], ['groups' => 'home_get']);
     }
 
