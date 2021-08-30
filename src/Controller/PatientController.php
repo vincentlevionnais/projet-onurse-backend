@@ -122,7 +122,6 @@ class PatientController extends AbstractController
     public function add(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $jsonContent = $request->getContent();
-
         // Deserialize the JSON to the new entity Patient
         // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
         $patient = $serializer->deserialize($jsonContent, Patient::class, 'json');
@@ -141,7 +140,7 @@ class PatientController extends AbstractController
                 $newErrors[$error->getPropertyPath()][] = $error->getMessage();
             }
 
-            return new JsonResponse(["errors" => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $entityManager->persist($patient);

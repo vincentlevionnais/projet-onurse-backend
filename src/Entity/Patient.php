@@ -9,6 +9,7 @@ use App\Repository\PatientRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=PatientRepository::class)
@@ -23,84 +24,127 @@ class Patient
      * @ORM\Column(type="integer")
      * @Groups({"patients_get"})
      * @Groups ({"appointment_get"})
+     * 
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=64)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Length(min = 1, max = 64)
+     * @Assert\Type("string")
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=64)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Length(min = 1, max = 64)
+     * @Assert\Type("string")
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="date", nullable=true)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\Type("datetime")
      */
     private $birthdate;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\Length(min = 15, max = 15)
+     * @Assert\Type(type={"digit"})
      */
     private $nir;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Length(min = 10, max = 10)
+     * @Assert\Type(type={"digit"})
      */
     private $phone;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Length(min = 8, max = 255)
+     * @Assert\Type("string")
+     * 
      */
     private $completeAdress;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\Length(max = 255)
+     * @Assert\Type("string")
      */
     private $informationAdress;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\Length(max = 255)
+     * @Assert\Type("string")
      */
     private $note;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\Length(max = 255)
+     * @Assert\Type("string")
      */
     private $doctorName;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\Length(max = 255)
+     * @Assert\Type("string")
      */
     private $mutualName;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\Length(min = 4, max = 20)
+     * @Assert\Type(type={"digit"})
      */
     private $mutualNumberAmc;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\Length(max = 255)
+     * @Assert\Type("string")
      */
     private $pathology;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Groups({"patients_get"})
+     * 
+     * @Assert\Type("string")
      */
     private $trustedPerson;
 
@@ -116,6 +160,7 @@ class Patient
 
     /**
      * @ORM\ManyToOne(targetEntity=Nurse::class, inversedBy="patients")
+     * 
      */
     private $nurse;
 

@@ -7,12 +7,13 @@ use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use App\Repository\AppointmentRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 
-// conflit
 
 /**
  * @ORM\Entity(repositoryClass=AppointmentRepository::class)
- * Cette entité va réagir aux évènements "lifecycle callbacks" de Doctrine
+ * 
+ * https://symfony.com/doc/current/doctrine/events.html#doctrine-lifecycle-callbacks
  * @ORM\HasLifecycleCallbacks()
  */
 class Appointment
@@ -28,18 +29,26 @@ class Appointment
     /**
      * @ORM\Column(type="datetime")
      * @Groups({"appointment_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Type("datetime")
      */
     private $datetimeStart;
 
     /**
      * @ORM\Column(type="datetime")
      * @Groups({"appointment_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Type("datetime")
      */
     private $datetimeEnd;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"appointment_get"})
+     * 
+     * @Assert\Type("string")
      */
     private $reason;
 
@@ -47,6 +56,9 @@ class Appointment
      * @ORM\ManyToOne(targetEntity=Patient::class, inversedBy="appointments")
      * @Groups({"nurse_get"})
      * @Groups({"appointment_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Type(type={"object"})
      */
     private $patient;
 
@@ -68,6 +80,11 @@ class Appointment
     /**
      * @ORM\Column(type="smallint", nullable=true)
      * @Groups({"appointment_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Length(min = 1, max = 1)
+     * @Assert\Type(type={"integer"})
+     * @Assert\Positive
      */
     private $status;
 
