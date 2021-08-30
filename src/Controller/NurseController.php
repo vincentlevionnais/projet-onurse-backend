@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Nurse;
-use App\Form\NurseType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -88,7 +87,6 @@ class NurseController extends AbstractController
         }
 
         return new JsonResponse(["message" => "Compte modifié"], Response::HTTP_OK);
-        
     }
 
 
