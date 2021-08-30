@@ -28,7 +28,7 @@ class NurseController extends AbstractController
 
         // Only the user can access to his own informations
         $user = $this->getUser();
-    
+
         return $this->json($user, Response::HTTP_OK, [], ['groups' => 'home_get']);
     }
 
@@ -79,8 +79,12 @@ class NurseController extends AbstractController
         // we désérialise the JSON to the existing Nurse entity
         $nurse = $serializer->deserialize($data, Nurse::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $nurse]);
 
-        $hashedPassword = $userPasswordHasher->hashPassword($nurse, $nurse->getPassword());
-        $nurse->setPassword($hashedPassword);
+        $password = $nurse->getPassword();
+
+        if ($password === true && $password !== null) {
+            $hashedPassword = $userPasswordHasher->hashPassword($nurse, $nurse->getPassword());
+            $nurse->setPassword($hashedPassword);
+        }
 
         // We can validate the entity with the Validator service
         $errors = $validator->validate($nurse);
