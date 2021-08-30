@@ -72,6 +72,8 @@ class NurseController extends AbstractController
         // else we get the data's request
         $data = $request->getContent();
 
+        $jsonData = json_decode($data, true);
+
         // @todo Pour PUT, s'assurer qu'on ait un certain nombre de champs
         // @todo Pour PATCH, s'assurer qu'on au moins un champ
         // sinon => 422 HTTP_UNPROCESSABLE_ENTITY
@@ -103,6 +105,12 @@ class NurseController extends AbstractController
             }
 
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if (isset($jsonData['password'])) {
+        
+            $hashedPassword = $userPasswordHasher->hashPassword($nurse, $nurse->getPassword());
+            $nurse->setPassword($hashedPassword);
         }
 
         $entityManager->flush();
