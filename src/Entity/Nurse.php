@@ -8,15 +8,19 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\NurseRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
  * @ORM\Entity(repositoryClass=NurseRepository::class)
  * Cette entité va réagir aux évènements "lifecycle callbacks" de Doctrine
  * @ORM\HasLifecycleCallbacks()
+ * 
+ * @UniqueEntity("email")
  */
 class Nurse  implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -38,29 +42,47 @@ class Nurse  implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="string", length=64)
      * @Groups({"nurse_get"})
      * @Groups({"home_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Length(min = 1, max = 64)
+     * @Assert\Type("string")
      */
     private $firstname;
 
     /**
      * @ORM\Column(type="string", length=64)
      * @Groups({"nurse_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Length(min = 1, max = 64)
+     * @Assert\Type("string")
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"nurse_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Email
      */
     private $email;
 
     /**
      * @ORM\Column(type="string", length=64)
+     * 
+     * @Assert\NotBlank
+     * //@Assert\Regex("/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/")
      */
     private $password;
 
     /**
      * @ORM\Column(type="string")
      * @Groups({"nurse_get"})
+     * 
+     * @Assert\NotBlank
+     * @Assert\Length(min = 10, max = 10)
+     * @Assert\Type(type={"digit"})
      */
     private $phone;
 
