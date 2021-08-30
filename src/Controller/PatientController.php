@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Patient;
 use App\Repository\PatientRepository;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -106,11 +108,20 @@ class PatientController extends AbstractController
 
         // Database recording error or succes 
         //! TODO : manage errors with @Assert
-        if (($entityManager->flush()) === false) {
-            return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
-        } else {
+        try{
+
+            $entityManager->flush();
             return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
+        }catch(Exception $e){
+
+            $e->getMessage();
+            return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
         }
+        // if (($entityManager->flush()) === false) {
+        //     return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
+        // } else {
+        //     return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
+        // }
     }
 
 
