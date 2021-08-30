@@ -47,6 +47,8 @@ class Appointment
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      * @Groups({"appointment_get"})
+     * 
+     * @Assert\Type("string")
      */
     private $reason;
 
