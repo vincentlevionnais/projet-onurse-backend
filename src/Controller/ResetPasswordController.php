@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
@@ -41,22 +43,22 @@ class ResetPasswordController extends AbstractController
     public function request(Request $request, MailerInterface $mailer): Response
     {
         //! 1 récupérer le getcontent request email
-        $form = $this->createForm(ResetPasswordRequestFormType::class);
-        $form->handleRequest($request);
-        
+        // $form = $this->createForm(ResetPasswordRequestFormType::class);
+        // $form->handleRequest($request);
+           $data = $request->getContent();
+        //    dd($data);
+           $jsonData = json_decode($data, true);
+        //    dd($jsonData);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // dd($form);
-            //! 2 renvoie à la fonction de reset 
+        if (isset($jsonData['email'])){
+            //! 2 renvoie à la fonction de reset
+            // dd($jsonData['email']);
             return $this->processSendingPasswordResetEmail(
-                $form->get('email')->getData(),
+                $jsonData['email'],
                 $mailer
-            );
+             );  
         }
 
-        return $this->render('reset_password/request.html.twig', [
-            'requestForm' => $form->createView(),
-        ]);
     }
 
 
@@ -73,10 +75,15 @@ class ResetPasswordController extends AbstractController
         if (null === ($resetToken = $this->getTokenObjectFromSession())) {
             $resetToken = $this->resetPasswordHelper->generateFakeResetToken();
         }
-
-        return $this->render('reset_password/check_email.html.twig', [
-            'resetToken' => $resetToken,
-        ]);
+         
+        // $newToken = $resetToken->getToken();
+        // dump($newToken);
+        dump($resetToken);
+        dd($resetToken->getToken());
+        return new JsonResponse($resetToken, RESPONSE:: HTTP_OK);
+        // return $this->render('reset_password/check_email.html.twig', [
+        //     'resetToken' => $resetToken,
+        // ]);
     }
 
     //! fonction qui traite la demande après que l'utilisateur ai cliqué dans son email 
@@ -172,9 +179,9 @@ class ResetPasswordController extends AbstractController
             //     'There was a problem handling your password reset request - %s',
             //     $e->getReason()
             // ));
-
+            // dd($e);  
             return $this->redirectToRoute('app_check_email');
-            
+           
         }
 
        
@@ -190,14 +197,23 @@ class ResetPasswordController extends AbstractController
                 'resetToken' => $resetToken,
             ])
         ;
-        
+        //  dd($resetToken);
         //! 4 le mail est envoyé
         $mailer->send($email);
         
+       
+        //! il stocke le token dans la session pour la route
+        // Store the token object in session for retrieval in check-email route.
+
+    
+    //    dd($test);
+        $newToken = $resetToken->getToken();
+        // dd($newToken);
+       
         //! il stocke le token dans la session pour la route
         // Store the token object in session for retrieval in check-email route.
         $this->setTokenObjectInSession($resetToken);
-
-        return $this->redirectToRoute('app_check_email');
+    
+        return $this->redirectToRoute('app_check_email', ['resetToken' =>$newToken]);
     }
 }
