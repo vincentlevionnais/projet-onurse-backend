@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Patient;
 use App\Repository\PatientRepository;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -106,11 +108,20 @@ class PatientController extends AbstractController
 
         // Database recording error or succes 
         //! TODO : manage errors with @Assert
-        if (($entityManager->flush()) === false) {
-            return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
-        } else {
+        try{
+
+            $entityManager->flush();
             return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
+        }catch(Exception $e){
+
+            $e->getMessage();
+            return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
         }
+        // if (($entityManager->flush()) === false) {
+        //     return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
+        // } else {
+        //     return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
+        // }
     }
 
 
@@ -122,7 +133,6 @@ class PatientController extends AbstractController
     public function add(Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $jsonContent = $request->getContent();
-
         // Deserialize the JSON to the new entity Patient
         // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
         $patient = $serializer->deserialize($jsonContent, Patient::class, 'json');
@@ -141,7 +151,7 @@ class PatientController extends AbstractController
                 $newErrors[$error->getPropertyPath()][] = $error->getMessage();
             }
 
-            return new JsonResponse(["errors" => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $entityManager->persist($patient);

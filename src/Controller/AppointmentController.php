@@ -15,7 +15,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 
-
 class AppointmentController extends AbstractController
 {
     /**
@@ -65,16 +64,24 @@ class AppointmentController extends AbstractController
         // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
         $appointment = $serializer->deserialize($jsonContent, Appointment::class, 'json');
 
+        $appointment->setNurse($this->getUser());
+
         // Validate with the Validator service
         $errors = $validator->validate($appointment);
 
         // If validation encounters errors
         // ($errors behaves like an array and contains an element by mistake)
         if (count($errors) > 0) {
-            return $this->json(["errors" => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
 
-        $appointment->setNurse($this->getUser());
+            $newErrors = [];
+
+            foreach ($errors as $error) {
+
+                $newErrors[$error->getPropertyPath()][] = $error->getMessage();
+            }
+
+            return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
 
         $entityManager->persist($appointment);
         $entityManager->flush();
