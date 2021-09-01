@@ -40,7 +40,7 @@ class ResetPasswordController extends AbstractController
      *
      * @Route("", name="app_forgot_password_request")
      */
-    public function request(Request $request, MailerInterface $mailer): Response
+    public function request(Request $request, MailerInterface $mailer)
     {
         //! 1 récupérer le getcontent request email
         // $form = $this->createForm(ResetPasswordRequestFormType::class);
@@ -58,33 +58,33 @@ class ResetPasswordController extends AbstractController
                 $mailer
              );  
         }
-
     }
 
 
-    //! Génère un faux jeton pour la sécurité de la page
-    /**
-     * Confirmation page after a user has requested a password reset.
-     *
-     * @Route("/check-email", name="app_check_email")
-     */
-    public function checkEmail(): Response
-    {
-        // Generate a fake token if the user does not exist or someone hit this page directly.
-        // This prevents exposing whether or not a user was found with the given email address or not
-        if (null === ($resetToken = $this->getTokenObjectFromSession())) {
-            $resetToken = $this->resetPasswordHelper->generateFakeResetToken();
-        }
-         
-        // $newToken = $resetToken->getToken();
-        // dump($newToken);
-        dump($resetToken);
-        dd($resetToken->getToken());
-        return new JsonResponse($resetToken, RESPONSE:: HTTP_OK);
-        // return $this->render('reset_password/check_email.html.twig', [
-        //     'resetToken' => $resetToken,
-        // ]);
-    }
+
+/////    /**
+/////     * Confirmation page after a user has requested a password reset.
+/////     *
+/////     * @Route("/check-email", name="app_check_email")
+/////     */
+/////    public function checkEmail()
+/////    {
+/////        // Generate a fake token if the user does not exist or someone hit this page directly.
+/////        // This prevents exposing whether or not a user was found with the given email address or not
+/////        if (null === ($resetToken = $this->getTokenObjectFromSession())) {
+/////            $resetToken = $this->resetPasswordHelper->generateFakeResetToken();
+/////            //dd($resetToken);
+/////        }
+/////         
+/////        //$newToken = $resetToken->getToken();
+/////        // dump($newToken);
+/////        //dd($resetToken);
+/////        //$resetToken->getToken();
+/////        return new JsonResponse(['resetToken' => $resetToken], RESPONSE:: HTTP_OK);
+/////        // return $this->render('reset_password/check_email.html.twig', [
+/////        //     'resetToken' => $resetToken,
+/////        // ]);
+/////    }
 
     //! fonction qui traite la demande après que l'utilisateur ai cliqué dans son email 
     /**
@@ -92,64 +92,80 @@ class ResetPasswordController extends AbstractController
      *
      * @Route("/reset/{token}", name="app_reset_password")
      */
-    public function reset(Request $request, UserPasswordHasherInterface $passwordEncoder, string $token = null): Response
+    public function reset(Request $request, UserPasswordHasherInterface $passwordEncoder, string $token)
     {
-        if ($token) {
+        //if ($token) {
             // We store the token in session and remove it from the URL, to avoid the URL being
             // loaded in a browser and potentially leaking the token to 3rd party JavaScript.
             //! le jeton est stocké en session
-            $this->storeTokenInSession($token);
+        //    $this->storeTokenInSession($token);
 
-            return $this->redirectToRoute('app_reset_password');
-        }
+        //    return $this->redirectToRoute('app_reset_password');
+        //}
 
-        $token = $this->getTokenFromSession();
-        if (null === $token) {
-            throw $this->createNotFoundException('No reset password token found in the URL or in the session.');
-        }
+        //$token = $this->getTokenFromSession();
+        //if (null === $token) {
+        //   throw $this->createNotFoundException('No reset password token found in the URL or in the session.');
+        //}
 
         try {
             $user = $this->resetPasswordHelper->validateTokenAndFetchUser($token);
         } catch (ResetPasswordExceptionInterface $e) {
-            $this->addFlash('reset_password_error', sprintf(
-                'There was a problem validating your reset request - %s',
-                $e->getReason()
-            ));
+            //$this->addFlash('reset_password_error', sprintf(
+            //    'There was a problem validating your reset request - %s',
+            //    $e->getReason()
+            //
+            //   
+            //));
 
-            return $this->redirectToRoute('app_forgot_password_request');
+ 
+            //return $this->redirectToRoute('app_forgot_password_request');
+            return new JsonResponse(["message" => "le lien n'est pas valide"], Response::HTTP_OK);
         }
 
         //! formulaire pour rentrer le nouveau mot de passe
         // The token is valid; allow the user to change their password.
-        $form = $this->createForm(ChangePasswordFormType::class);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+
+        //$form = $this->createForm(ChangePasswordFormType::class);
+        //$form->handleRequest($request);
+
+        //if ($form->isSubmitted() && $form->isValid()) {
             // A password reset token should be used only once, remove it.
+            
+
+            $data = $request->getContent();
+            //    dd($data);
+            $jsonData = json_decode($data, true);
+            if($jsonData['password'] != $jsonData['repassword']) {
+                return new JsonResponse(["message" => "mot de passe non identiques"], Response::HTTP_OK);
+            }
             $this->resetPasswordHelper->removeResetRequest($token);
 
             // Encode the plain password, and set it.
             $encodedPassword = $passwordEncoder->hashPassword(
                 $user,
-                $form->get('plainPassword')->getData()
+                $jsonData['password']
             );
+            
 
             $user->setPassword($encodedPassword);
             $this->getDoctrine()->getManager()->flush();
 
             // The session is cleaned up after the password has been changed.
-            $this->cleanSessionAfterReset();
+            //$this->cleanSessionAfterReset();
 
-            return $this->redirectToRoute('api_login_check');
-        }
+            //return $this->redirectToRoute('api_login_check');
+            return new JsonResponse(["message" => "mot de passe modifié"], Response::HTTP_OK);
+        //}
 
-        return $this->render('reset_password/reset.html.twig', [
-            'resetForm' => $form->createView(),
-        ]);
+        //return $this->render('reset_password/reset.html.twig', [
+        //    'resetForm' => $form->createView(),
+        //]);
     }
 
     //! 3 fonction de reset 
-    private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer): RedirectResponse
+    private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer)
     {
         // dd($emailFormData);
         
@@ -162,7 +178,8 @@ class ResetPasswordController extends AbstractController
         // Do not reveal whether a user account was found or not.
         if (!$user) {
             //!retourner jsonresponse utilisateur non trouvé ou autre
-            return $this->redirectToRoute('app_check_email');
+            //return $this->redirectToRoute('app_check_email');
+            return new JsonResponse(["message" => "erreur2"], Response::HTTP_OK);
         }
 
         try {
@@ -179,8 +196,11 @@ class ResetPasswordController extends AbstractController
             //     'There was a problem handling your password reset request - %s',
             //     $e->getReason()
             // ));
-            // dd($e);  
-            return $this->redirectToRoute('app_check_email');
+
+            // dd($e); 
+
+            //return $this->redirectToRoute('app_check_email');
+            return new JsonResponse(["message" => $e->getReason()], Response::HTTP_OK);
            
         }
 
@@ -200,20 +220,12 @@ class ResetPasswordController extends AbstractController
         //  dd($resetToken);
         //! 4 le mail est envoyé
         $mailer->send($email);
-        
-       
+               
         //! il stocke le token dans la session pour la route
         // Store the token object in session for retrieval in check-email route.
-
+        //$this->setTokenObjectInSession($resetToken);
     
-    //    dd($test);
-        $newToken = $resetToken->getToken();
-        // dd($newToken);
-       
-        //! il stocke le token dans la session pour la route
-        // Store the token object in session for retrieval in check-email route.
-        $this->setTokenObjectInSession($resetToken);
-    
-        return $this->redirectToRoute('app_check_email', ['resetToken' =>$newToken]);
+        //return $this->redirectToRoute('app_check_email');
+        return new JsonResponse(["message" => "mail envoyé"], Response::HTTP_OK);
     }
 }
