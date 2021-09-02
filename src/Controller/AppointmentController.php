@@ -14,7 +14,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-
 class AppointmentController extends AbstractController
 {
     /**
@@ -27,7 +26,7 @@ class AppointmentController extends AbstractController
         $appointments = $appointmentRepository->findby(['nurse' => $this->getUser()]);
 
         // Resquest to Symfony to "serialize" entities in form of JSON
-        return $this->json($appointments, 200, [], ['groups' => 'appointment_get']);
+        return $this->json($appointments, Response::HTTP_OK, [], ['groups' => 'appointment_get']);
     }
 
     /**
@@ -61,7 +60,6 @@ class AppointmentController extends AbstractController
         $jsonContent = $request->getContent();
 
         // Deserialization of JSON to an entity Appointment
-        // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
         $appointment = $serializer->deserialize($jsonContent, Appointment::class, 'json');
 
         $appointment->setNurse($this->getUser());
@@ -83,6 +81,7 @@ class AppointmentController extends AbstractController
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        // Database recording
         $entityManager->persist($appointment);
         $entityManager->flush();
 
@@ -115,13 +114,7 @@ class AppointmentController extends AbstractController
         // Retrieve the request data
         $data = $request->getContent();
 
-
-        //TODO Pour PUT, s'assurer qu'on ait un certain nombre de champs
-        //TODO Pour PATCH, s'assurer qu'on au moins un champ
-        //TODO sinon => 422 HTTP_UNPROCESSABLE_ENTITY
-
         // Deserialize the JSON to the *existing Appointment entity*
-        // @see https://symfony.com/doc/current/components/serializer.html#deserializing-in-an-existing-object
         $appointment = $serializer->deserialize($data, Appointment::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $appointment]);
 
         // Validate entity
@@ -140,13 +133,11 @@ class AppointmentController extends AbstractController
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Database recording error or succes
-        //! TODO : manage errors with @Assert
-        if (($entityManager->flush()) === false) {
-            return new JsonResponse(["message" => "Erreur : Rendez-vous non modifié"], Response::HTTP_EXPECTATION_FAILED);
-        } else {
-            return new JsonResponse(["message" => "Rendez-vous modifié"], Response::HTTP_OK);
-        }
+        // Database recording
+        $entityManager->flush();
+
+        return new JsonResponse(["message" => "Rendez-vous modifié"], Response::HTTP_OK);
+        
     }
 
     /**
@@ -167,11 +158,10 @@ class AppointmentController extends AbstractController
         if ($user != $nurseAppointment) {
             return new JsonResponse(["message" => "Rendez-vous non trouvé"], Response::HTTP_NOT_FOUND);
         }
-
+        // Database remove
         $em->remove($appointment);
         $em->flush();
 
-        //! TODO : manage errors with @Assert
         return $this->json(['message' => 'Rendez-vous supprimé.'], Response::HTTP_OK);
     }
 }

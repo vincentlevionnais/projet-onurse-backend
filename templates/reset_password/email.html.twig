@@ -1,0 +1,13 @@
+<h2>Bonjour,</h2>
+
+<p>Pour réinitialiser votre mot de passe, il suffit de cliquer sur le lien suivant :</p>
+
+<a href="{{ app.request.server.get('FRONT_URL') }}/reset_password/{{resetToken.token}}">Je réinitialise mon mot de passe oublié.</a>
+
+<p>Ce lien va expirer dans 1 heure.</p>
+
+<p>A tout de suite!</p>
+
+<p>L'équipe O'Nurse.</p>
+
+<img src="{{absolute_url(asset('images/logo-mail.png'))}}" alt="logo-onurse" width="80rem">
