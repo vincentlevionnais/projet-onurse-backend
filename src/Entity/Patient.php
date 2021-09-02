@@ -76,11 +76,11 @@ class Patient
     private $phone;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=500)
      * @Groups({"patients_get"})
      * 
      * @Assert\NotBlank
-     * @Assert\Length(min = 8, max = 255)
+     * @Assert\Length(min = 8, max = 500)
      * @Assert\Type("string")
      * 
      */
