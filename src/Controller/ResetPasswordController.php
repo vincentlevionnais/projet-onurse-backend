@@ -4,20 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Nurse;
 use Symfony\Component\Mime\Address;
-use App\Form\ChangePasswordFormType;
-use App\Form\ResetPasswordRequestFormType;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
 use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
 
@@ -38,7 +33,7 @@ class ResetPasswordController extends AbstractController
     /**
      * Display & process form to request a password reset.
      *
-     * @Route("", name="app_forgot_password_request")
+     * @Route("", name="app_forgot_password_request", methods="POST")
      */
     public function request(Request $request, MailerInterface $mailer)
     {
@@ -57,12 +52,12 @@ class ResetPasswordController extends AbstractController
     /**
      * Validates and process the reset URL that the user clicked in their email.
      *
-     * @Route("/reset/{token}", name="app_reset_password")
+     * @Route("/reset/{token}", name="app_reset_password", methods="POST")
      */
     public function reset(Request $request, UserPasswordHasherInterface $passwordEncoder, string $token)
     {
         try {
-            //dd($token);
+            
             $user = $this->resetPasswordHelper->validateTokenAndFetchUser($token);
 
         } catch (ResetPasswordExceptionInterface $e) {
@@ -78,7 +73,7 @@ class ResetPasswordController extends AbstractController
             return new JsonResponse(["message" => "mot de passe non identiques"], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $this->resetPasswordHelper->removeResetRequest($token);
-        //dd($token);
+        
         // Encode the plain password, and set it.
         $encodedPassword = $passwordEncoder->hashPassword(
             $user,
