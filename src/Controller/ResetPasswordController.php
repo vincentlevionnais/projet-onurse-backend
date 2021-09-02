@@ -62,7 +62,7 @@ class ResetPasswordController extends AbstractController
 
         } catch (ResetPasswordExceptionInterface $e) {
 
-            return new JsonResponse(["message" => "le lien n'est pas valide"], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(["message" => "le lien n'est pas valide"], Response::HTTP_NOT_FOUND);
         }
 
         $data = $request->getContent();
@@ -70,7 +70,7 @@ class ResetPasswordController extends AbstractController
         $jsonData = json_decode($data, true);
 
         if($jsonData['password'] != $jsonData['confirmationPassword']) {
-            return new JsonResponse(["message" => "mot de passe non identiques"], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(["message" => "mots de passe non identiques"], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $this->resetPasswordHelper->removeResetRequest($token);
         

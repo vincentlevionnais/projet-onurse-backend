@@ -13,11 +13,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class NurseController extends AbstractController
 {
-
     /**
      * Get the nurse connected
      * 
@@ -72,10 +70,6 @@ class NurseController extends AbstractController
         $data = $request->getContent();
 
         $jsonData = json_decode($data, true);
-
-        // @todo Pour PUT, s'assurer qu'on ait un certain nombre de champs
-        // @todo Pour PATCH, s'assurer qu'on au moins un champ
-        // sinon => 422 HTTP_UNPROCESSABLE_ENTITY
 
         // we désérialise the JSON to the existing Nurse entity
         $nurse = $serializer->deserialize($data, Nurse::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $nurse]);
@@ -168,7 +162,6 @@ class NurseController extends AbstractController
         $entityManager->remove($nurse);
         $entityManager->flush();
 
-        //! TODO : manage errors with @Assert
         return $this->json(['message' => 'Votre compte a bien été supprimé.'], Response::HTTP_OK);
     }
 }

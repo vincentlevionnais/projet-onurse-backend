@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Patient;
 use App\Repository\PatientRepository;
-use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,8 +14,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-
 
 class PatientController extends AbstractController
 {
@@ -30,9 +27,8 @@ class PatientController extends AbstractController
         $patients = $patientRepository->findBy(['nurse' => $this->getUser()]);
 
         // Resquest to Symfony to "serialize" entities in form of JSON
-        return $this->json($patients, 200, [], ['groups' => 'patients_get']);
+        return $this->json($patients, Response::HTTP_OK, [], ['groups' => 'patients_get']);
     }
-
 
     /**
      * Get one patient by id
@@ -79,10 +75,6 @@ class PatientController extends AbstractController
         // else we get the data's request
         $data = $request->getContent();
 
-        // @todo Pour PUT, s'assurer qu'on ait un certain nombre de champs
-        // @todo Pour PATCH, s'assurer qu'on au moins un champ
-        // sinon => 422 HTTP_UNPROCESSABLE_ENTITY
-
         // we deserialize the JSON to the existing Patient entity
         $patient = $serializer->deserialize($data, Patient::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $patient]);
 
@@ -106,24 +98,12 @@ class PatientController extends AbstractController
             return new JsonResponse(["errors" => $newErrors], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // Database recording error or succes 
-        //! TODO : manage errors with @Assert
-        try{
+        // Database recording
+        $entityManager->flush();
 
-            $entityManager->flush();
-            return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
-        }catch(Exception $e){
+        return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
 
-            $e->getMessage();
-            return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
-        }
-        // if (($entityManager->flush()) === false) {
-        //     return new JsonResponse(["message" => "Erreur : Patient non modifié"], Response::HTTP_EXPECTATION_FAILED);
-        // } else {
-        //     return new JsonResponse(["message" => "Patient modifié"], Response::HTTP_OK);
-        // }
     }
-
 
     /**
      * add a new patient
@@ -134,7 +114,6 @@ class PatientController extends AbstractController
     {
         $jsonContent = $request->getContent();
         // Deserialize the JSON to the new entity Patient
-        // @see https://symfony.com/doc/current/components/serializer.html#deserializing-an-object
         $patient = $serializer->deserialize($jsonContent, Patient::class, 'json');
 
         $patient->setNurse($this->getUser());
@@ -188,7 +167,6 @@ class PatientController extends AbstractController
         $entityManager->remove($patient);
         $entityManager->flush();
         
-        //! TODO : manage errors with @Assert
         return $this->json(['message' => 'Le patient a bien été supprimé.'], Response::HTTP_OK);
     }
 }
