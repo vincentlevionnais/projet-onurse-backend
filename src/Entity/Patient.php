@@ -160,6 +160,7 @@ class Patient
 
     /**
      * @ORM\ManyToOne(targetEntity=Nurse::class, inversedBy="patients")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      * 
      */
     private $nurse;
